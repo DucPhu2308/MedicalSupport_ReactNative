@@ -17,6 +17,11 @@ class PostAPI {
         return axiosClient.get(url);
     }
 
+    static async getPostPagination(page, limit) {
+        const url = `/post/search?page=${page}&limit=${limit}`;
+        return axiosClient.get(url);
+    }
+
     static async searchPost(q) {
         const url = `/post/search?title=${q}&content=${q}`;
         console.log(url);
