@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, Button, Pressable, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Pressable, ImageBackground, TouchableOpacity } from 'react-native';
 import AuthAPI from "../API/AuthAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const LoginScreen = ({ navigation }) => {

@@ -20,7 +20,7 @@ export default function App() {
           component={IntroScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
         <Stack.Screen name="Nav" component={NavigationBar} options={{ headerShown: false }} />
