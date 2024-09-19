@@ -18,7 +18,7 @@ class PostAPI {
     }
 
     static async searchPost(q) {
-        const url = `/post/search?title=${q}&content=${q}`;
+        const url = `/post/search?title=${q}}`;
         console.log(url);
         return axiosClient.get(url);
     }
