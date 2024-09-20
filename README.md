@@ -37,7 +37,7 @@ Dự án này là một mạng xã hội về sức khỏe, nơi người dùng 
 Người dùng có thể cập nhật thông tin cá nhân bao gồm tên, số điện thoại, địa chỉ, và các thông tin liên quan đến cá nhân.
 
 ### 2. Giao Diện Tìm Kiếm và Chia Sẻ Bài Viết:
-![Giao Diện Tìm Kiếm và Chia Sẻ Bài Viết](https://github.com/user-attachments/assets/37c605ce-8a27-4cad-9f58-b332d0cd842d)
+![Giao Diện Tìm Kiếm và Chia Sẻ Bài Viết](https://github.com/user-attachments/assets/d6d844a5-efee-408e-877a-9aedcbe55e1d)
 
 Người dùng có thể tìm kiếm các bài viết về sức khỏe, đọc và chia sẻ chúng lên mạng xã hội. Mỗi bài viết đều có phần bình luận cho phép người dùng tương tác và thảo luận với nhau.
 
