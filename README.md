@@ -32,33 +32,42 @@ Phần 2: Giao Diện
 
 1. Giao Diện Cập Nhật Hồ Sơ Cá Nhân:
 ![image](https://github.com/user-attachments/assets/d9738480-4693-4927-b7c7-508360d8ad11)
+
 Người dùng có thể cập nhật thông tin cá nhân bao gồm tên, số điện thoại, địa chỉ, và các thông tin liên quan đến cá nhân.
 
 2. Giao Diện Tìm Kiếm và Chia Sẻ Bài Viết:
+![image](https://github.com/user-attachments/assets/37c605ce-8a27-4cad-9f58-b332d0cd842d)
+
 Người dùng có thể tìm kiếm các bài viết về sức khỏe, đọc và chia sẻ chúng lên mạng xã hội. Mỗi bài viết đều có phần bình luận cho phép người dùng tương tác và thảo luận với nhau.
 
 3. Giao Diện Đặt Lịch Hẹn:
 ![image](https://github.com/user-attachments/assets/602d8c19-4c09-45f4-abc2-6ae577b70bb2)
+
 Người dùng có thể chọn bác sĩ phù hợp và đặt lịch hẹn trực tiếp thông qua giao diện đơn giản. Thời gian trống của bác sĩ sẽ được hiển thị để người dùng chọn.
 
-4. Giao diện chat
+5. Giao diện chat
 ![image](https://github.com/user-attachments/assets/74eb69fa-60d7-40fe-91d4-a9227a4d2b1e)
+
 Người dùng có thể trò chuyện với bác sĩ thông qua giao diện chat
 
-5. Giao diện chi tiết cuộc hẹn
+6. Giao diện chi tiết cuộc hẹn
 ![image](https://github.com/user-attachments/assets/356862f6-5f48-4111-833a-24fd4d13b4ae)
+
 Người dùng có thể xem tổng quan cuộc hẹn như thời gian, địa điểm, bác sĩ, ...
 
-6. Giao diện trang chủ
+7. Giao diện trang chủ
 ![image](https://github.com/user-attachments/assets/fc07b34f-2aed-4480-8dd4-ea77ec4c9753)
+
 Người dùng có thể lướt xem các bài đăng, like, comment hoặc share bài viết
 
-7. Giao diện chi tiết bài viết
+8. Giao diện chi tiết bài viết
 ![image](https://github.com/user-attachments/assets/557f2018-56aa-43f9-97ff-e4617a371085)
+
 Người dùng có thể xem chi tiết thông tin về một bài viết, số lượt like, share, tất cả những bình luận về bài viết
 
-8. Giao diện thông báo
+9. Giao diện thông báo
 ![image](https://github.com/user-attachments/assets/89bba95d-429f-4c94-b446-22415def00c1)
+
 Người dùng có thể xem thông báo như thông báo về người nào đã thích bài viết, ai đã comment bài viết và nhiều thông báo khác liên quan đến cá nhân người dùng
 
 * Công Nghệ Sử Dụng:
