@@ -1,57 +1,58 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import PostAPI from '../API/PostAPI';
 import PostItem from '../components/PostItem';
 
 const HomeScreen = () => {
-  const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  AsyncStorage.getItem('user')
-    .then(data => {
-      setUser(JSON.parse(data));
-    })
-    .catch(error => {
+  const LIMIT = 2;
+
+  const getPosts = async () => {
+    setLoading(true);
+    try {
+      const response = await PostAPI.getPostPagination(page, LIMIT);
+      setPosts([...posts, ...response.data]);
+      if (response.data.length < LIMIT) {
+        setHasMore(false);
+      }
+      console.log(page);
+    } catch (error) {
       console.error(error);
-    });
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const getAllPost = async () => {
-      try {
-        const response = await PostAPI.getAllPost();
-        console.log(response.data);
-        setPosts(response.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    getAllPost();
-  }, []);
+    
+    getPosts();
+  }, [page]);
+
+  handleLoadMore = () => {
+    if (hasMore && !loading) {
+      setPage(prevPage => prevPage + 1);
+    }
+  }
+
   return (
     <View>
       {/* <Text style={styles.text}>Trang chủ</Text>
       <Text>{user && ('Chào ' + user.firstName + ' ' + user.lastName + '!')}</Text> */}
       <FlatList
+        onEndReached={handleLoadMore}
         data={posts}
         keyExtractor={item => item._id}
         renderItem={({ item }) => <PostItem post={item} />}
+        ListFooterComponent={
+          loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+        }
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-});
 
 export default HomeScreen;

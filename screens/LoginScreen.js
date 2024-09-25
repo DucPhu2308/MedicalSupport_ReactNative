@@ -8,8 +8,12 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  
+
   const handleLogin = () => {
+    if (!email || !password) {
+      setError("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
     const data = {
       email,
       password
@@ -58,14 +62,15 @@ const LoginScreen = ({ navigation }) => {
               secureTextEntry
             />
           </View>
+          {error ? <Text className='text-red-500 text-center mt-2'>{error}</Text> : null}
           <View className="mt-5">
             <TouchableOpacity onPress={() => navigation.navigate('FillEmail')}>
               <Text className="text-blue-500 text-right">Quên mật khẩu?</Text>
             </TouchableOpacity>
           </View>
-          <View className="mt-5">
-            <Button title="Đăng nhập" onPress={handleLogin} />
-          </View>
+          <TouchableOpacity className='bg-blue-500 p-3 rounded-lg mt-5' onPress={handleLogin}>
+            <Text className='text-white text-center font-bold'>Đăng nhập</Text>
+          </TouchableOpacity>
           <View className="mt-5 flex-row justify-center">
             <Text className="text-center">Chưa có tài khoản?</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -79,32 +84,32 @@ const LoginScreen = ({ navigation }) => {
 
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  subText: {
-    fontSize: 16,
-    fontWeight: 'normal',
-  },
-  errorText: {
-    color: 'red',
-    backgroundColor: 'pink',
-  },
-  input: {
-    width: 300,
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-  }
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     backgroundColor: '#f0f0f0',
+//   },
+//   text: {
+//     fontSize: 24,
+//     fontWeight: 'bold',
+//   },
+//   subText: {
+//     fontSize: 16,
+//     fontWeight: 'normal',
+//   },
+//   errorText: {
+//     color: 'red',
+//     backgroundColor: 'pink',
+//   },
+//   input: {
+//     width: 300,
+//     height: 40,
+//     margin: 12,
+//     borderWidth: 1,
+//     padding: 10,
+//   }
+// });
 
 export default LoginScreen;

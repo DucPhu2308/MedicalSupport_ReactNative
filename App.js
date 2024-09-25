@@ -20,13 +20,13 @@ export default function App() {
           component={IntroScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
         <Stack.Screen name="Nav" component={NavigationBar} options={{ headerShown: false }} />
-        <Stack.Screen name="FillOtp" component={FillOtpScreen} />
-        <Stack.Screen name="FillEmail" component={FillEmailScreen} />
-        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+        <Stack.Screen name="FillOtp" component={FillOtpScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="FillEmail" component={FillEmailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
