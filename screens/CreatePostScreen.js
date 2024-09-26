@@ -1,0 +1,155 @@
+import { Text, TextInput, TouchableOpacity, View, ScrollView, Image, Modal } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker from Expo
+import { useState } from 'react';
+
+export default function CreatePostScreen() {
+    const [selectedImages, setSelectedImages] = useState([]);
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [selectedImageForDetail, setSelectedImageForDetail] = useState(null);
+
+    // Function to pick an image
+    const pickImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Permission denied!');
+            return;
+        }
+
+        if (selectedImages.length >= 4) {
+            alert('You can only upload up to 4 images.');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setSelectedImages([...selectedImages, result.assets[0].uri]);
+        }
+    };
+
+    // Function to delete an image
+    const deleteImage = (index) => {
+        const updatedImages = selectedImages.filter((_, i) => i !== index);
+        setSelectedImages(updatedImages);
+    };
+
+    // Function to open modal with the selected image
+    const openImageDetail = (imageUri) => {
+        setSelectedImageForDetail(imageUri);
+        setModalVisible(true);
+    };
+
+    // Function to close modal
+    const closeModal = () => {
+        setModalVisible(false);
+        setSelectedImageForDetail(null);
+    };
+
+    return (
+        <View className="flex-1 justify-center p-2" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+            <View className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 1)' }}>
+                <View className="justify-center">
+                    <View className="flex-row items-center justify-between">
+                        <TouchableOpacity>
+                            <FontAwesome name="close" size={24} color="black" />
+                        </TouchableOpacity>
+                        <Text className="font-bold text-xl">Tạo bài viết</Text>
+                        <TouchableOpacity>
+                            <Text className="font-bold text-blue-500">Đăng</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Content */}
+                    <View className="mt-5">
+                        {/* Input */}
+                        <TextInput
+                            placeholder="Nhập tiêu đề bài viết"
+                            className="border-b-2 border-gray-200"
+                        />
+                        <ScrollView style={{ maxHeight: 150 }} nestedScrollEnabled={true}> 
+                            <TextInput
+                                placeholder="Nhập nội dung bài viết"
+                                multiline
+                                numberOfLines={4}
+                                style={{ borderBottomWidth: 2, borderColor: 'gray', padding: 5 }}
+                            />
+                        </ScrollView>
+
+                        {/* Image Upload */}
+                        <View className="flex-row mt-3">
+                            <TouchableOpacity
+                                className="bg-gray-200 w-24 h-24 items-center justify-center"
+                                onPress={pickImage}
+                            >
+                                <FontAwesome name="image" size={24} color="gray" />
+                            </TouchableOpacity>
+
+                            <View className="flex-1 ml-3">
+                                <Text className="text-sm text-gray-500">Thêm ảnh vào bài viết</Text>
+                            </View>
+                        </View>
+
+                        {/* Display Selected Images with Delete Button and Detail View */}
+                        {selectedImages.length > 0 && (
+                            <ScrollView className="flex-row mt-3" horizontal>
+                                {selectedImages.map((imageUri, index) => (
+                                    <View key={index} style={{ position: 'relative', marginRight: 10 }}>
+                                        <TouchableOpacity onPress={() => openImageDetail(imageUri)}>
+                                            <Image
+                                                source={{ uri: imageUri }}
+                                                style={{ width: 100, height: 100, borderRadius: 8 }}
+                                            />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={{
+                                                position: 'absolute',
+                                                top: 5,
+                                                right: 5,
+                                                backgroundColor: 'rgba(0,0,0,0.6)',
+                                                borderRadius: 12,
+                                                padding: 2,
+                                            }}
+                                            onPress={() => deleteImage(index)}
+                                        >
+                                            <FontAwesome name="times-circle" size={18} color="white" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        )}
+                    </View>
+                </View>
+            </View>
+
+            {/* Modal for Image Detail View */}
+            {selectedImageForDetail && (
+                <Modal visible={isModalVisible} transparent={true}>
+                    <View style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                        <TouchableOpacity
+                            style={{ position: 'absolute', top: 40, right: 20 }}
+                            onPress={closeModal}
+                        >
+                            <FontAwesome name="times" size={30} color="white" />
+                        </TouchableOpacity>
+                        <Image
+                            source={{ uri: selectedImageForDetail }}
+                            style={{ width: '90%', height: '80%', borderRadius: 10 }}
+                            resizeMode="contain"
+                        />
+                    </View>
+                </Modal>
+            )}
+        </View>
+    );
+}

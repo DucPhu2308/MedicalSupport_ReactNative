@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 
 const PostItem = ({ post }) => {
     const navigation = useNavigation();
-
     return (
         <View onTouchEnd={
             () => navigation.navigate('PostDetail', { post })
