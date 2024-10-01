@@ -18,7 +18,7 @@ const LoginScreen = ({ navigation }) => {
       email,
       password
     };
-
+    
     AuthAPI.login(data)
       .then(response => {
         console.log(response.data);

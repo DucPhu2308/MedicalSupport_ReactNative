@@ -18,7 +18,7 @@ const FillOtpScreen = ({ navigation }) => {
             email,
             activeCode: otp,
         };
-
+        console.log(data);
         AuthAPI.confirmUser(data)
             .then(response => {
                 console.log(response.data);
