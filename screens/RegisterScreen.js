@@ -13,7 +13,7 @@ const RegisterScreen = ({ navigation }) => {
     const [lastName, setLastName] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [gender, setGender] = useState('Nam');
+    const [gender, setGender] = useState(true);
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
 
@@ -111,11 +111,11 @@ const RegisterScreen = ({ navigation }) => {
                             <RadioButton.Group onValueChange={newValue => setGender(newValue)} value={gender} >
                                 <View className='flex-row justify-around mt-2'>
                                     <View className='flex-row items-center'>
-                                        <RadioButton value="male" />
+                                        <RadioButton value={true} />
                                         <Text>Nam</Text>
                                     </View>
                                     <View className='flex-row items-center'>
-                                        <RadioButton value="female" />
+                                        <RadioButton value={false} />
                                         <Text>Nữ</Text>
                                     </View>
                                 </View>
