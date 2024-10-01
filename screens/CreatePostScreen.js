@@ -2,12 +2,51 @@ import { Text, TextInput, TouchableOpacity, View, ScrollView, Image, Modal } fro
 import { FontAwesome } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker from Expo
 import { useState } from 'react';
-
+import PostAPI from "../API/PostAPI";
+import { useNavigation } from "@react-navigation/native";
 export default function CreatePostScreen() {
     const [selectedImages, setSelectedImages] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedImageForDetail, setSelectedImageForDetail] = useState(null);
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [images, setImages] = useState([]);
+    const navigation = useNavigation();
 
+    const handleCreatePost = () => {
+        if (!title || !content) {
+            alert('Vui lòng điền đầy đủ thông tin!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        selectedImages.forEach((image, index) => {
+            formData.append('images', {
+                name: `image-${index}.jpg`,
+                type: 'image/jpeg',
+                uri: image,
+            });
+        });
+
+        console.log(formData);
+
+        PostAPI.createPost(formData)
+            .then(response => {
+                console.log(response.data);
+                alert('Đăng bài viết thành công!');
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Đăng bài viết thất bại!');
+            });
+    };
+
+    const handleCloseScreenCreatePost = () => {
+        navigation.goBack();
+    };
+    
     // Function to pick an image
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -16,10 +55,6 @@ export default function CreatePostScreen() {
             return;
         }
 
-        if (selectedImages.length >= 4) {
-            alert('You can only upload up to 4 images.');
-            return;
-        }
 
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -56,11 +91,11 @@ export default function CreatePostScreen() {
             <View className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 1)' }}>
                 <View className="justify-center">
                     <View className="flex-row items-center justify-between">
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleCloseScreenCreatePost}>
                             <FontAwesome name="close" size={24} color="black" />
                         </TouchableOpacity>
                         <Text className="font-bold text-xl">Tạo bài viết</Text>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleCreatePost}>
                             <Text className="font-bold text-blue-500">Đăng</Text>
                         </TouchableOpacity>
                     </View>
@@ -71,12 +106,16 @@ export default function CreatePostScreen() {
                         <TextInput
                             placeholder="Nhập tiêu đề bài viết"
                             className="border-b-2 border-gray-200"
+                            value={title}
+                            onChangeText={setTitle}
                         />
                         <ScrollView style={{ maxHeight: 150 }} nestedScrollEnabled={true}> 
                             <TextInput
                                 placeholder="Nhập nội dung bài viết"
                                 multiline
                                 numberOfLines={4}
+                                value={content}
+                                onChangeText={setContent}
                                 style={{ borderBottomWidth: 2, borderColor: 'gray', padding: 5 }}
                             />
                         </ScrollView>
