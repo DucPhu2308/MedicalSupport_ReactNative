@@ -8,6 +8,7 @@ import FillEmailScreen from './screens/FillEmailScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import NavigationBar from './navigation/NavigationBar';
 import CreatePostScreen from './screens/CreatePostScreen';
+import ChatDetailScreen from './screens/ChatDetailScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -25,6 +26,7 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
         <Stack.Screen name="Nav" component={NavigationBar} options={{ headerShown: false }} />
+        <Stack.Screen name="ChatDetail" component={ChatDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FillOtp" component={FillOtpScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FillEmail" component={FillEmailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }}/>
