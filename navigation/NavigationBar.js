@@ -6,6 +6,7 @@ import SearchScreen from "../screens/SearchScreen";
 import PostDetailScreen from "../screens/PostDetailScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import { Ionicons } from "@expo/vector-icons";
+import ChatDetailScreen from "../screens/ChatDetailScreen";
 
 const Tab = createBottomTabNavigator()
 
@@ -47,6 +48,11 @@ const NavigationBar = () => {
                 tabBarVisible: false,
                 headerShown: false
             }} />
+            {/* <Tab.Screen name="ChatDetail" component={ChatDetailScreen} options={{
+                tabBarButton: () => null,
+                tabBarVisible: false,
+                headerShown: false
+            }} /> */}
 
 
         </Tab.Navigator>

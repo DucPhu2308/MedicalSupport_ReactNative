@@ -1,6 +1,9 @@
 import { Text, TouchableOpacity, View, Image } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { COLOR } from "../CommonConst";
 
 
 const PostDetailScreen = ({ route }) => {
@@ -8,8 +11,9 @@ const PostDetailScreen = ({ route }) => {
     const navigation = useNavigation();
 
     return (
-        <>
-            <View className="flex-row justify-between items-center p-2 pt-7 bg-blue-500">
+        <SafeAreaView>
+            <StatusBar backgroundColor={COLOR.PRIMARY} barStyle='light-content'/>
+            <View className="flex-row justify-between items-center p-2 bg-blue-500">
                 <TouchableOpacity
                     onPress={() => navigation.goBack()}
                     className="mx-2">
@@ -92,7 +96,7 @@ const PostDetailScreen = ({ route }) => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </>
+        </SafeAreaView>
 
     );
 };
