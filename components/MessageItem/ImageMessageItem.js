@@ -15,7 +15,10 @@ const ImageMessageItem = ({ message, isSent }) => {
     };
 
     return (
-        <View className={`flex-wrap my-1 ${images.length > 1 ? 'flex-row' : ''}`}>
+        <View className={`flex-wrap my-1 max-w-xs
+            ${images.length > 1 ? 'flex-row' : ''}
+            ${isSent ? 'self-end' : 'self-start'}
+        `}>
             {images.map((image, index) => (
                 <TouchableOpacity
                     className={`${images.length === 1 ? 'w-3/4 h-64' : 'w-32 h-32'}`}

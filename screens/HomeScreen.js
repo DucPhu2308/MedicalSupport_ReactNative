@@ -20,7 +20,6 @@ const HomeScreen = () => {
       if (response.data.length < LIMIT) {
         setHasMore(false);
       }
-      console.log(page);
     } catch (error) {
       console.error(error);
     }
