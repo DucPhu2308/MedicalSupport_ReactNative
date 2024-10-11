@@ -5,6 +5,12 @@ export class ChatAPI {
         return axiosPrivate.get(`/chat/${chatId}/messages`)
     }
 
+    static async getMessagesPagination(chatId, page, limit) {
+        return axiosPrivate.get(`/chat/${chatId}/messages`, {
+            params: { page, pageSize: limit }
+        });
+    }
+
     static async getPrivateChat(userId) {
         const url = `/chat/private/${userId}`;
         return axiosPrivate.get(url);

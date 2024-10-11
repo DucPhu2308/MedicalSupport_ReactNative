@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { styled } from 'nativewind';
 import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,6 +21,26 @@ const ChatDetailScreen = ({ navigation, route }) => {
     const messageListRef = useRef(null);
     const { chatId } = route.params;
 
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+
+    const LIMIT = 10;
+
+    const getMessages = async () => {
+        setLoading(true);
+        try {
+            const response = await ChatAPI.getMessagesPagination(chatId, page, LIMIT);
+            setMessages([...messages, ...response.data]);
+            if (response.data.length < LIMIT) {
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        setLoading(false);
+    };
+
     useEffect(() => {
         connectSocket().then((socket) => {
             setSocket(socket);
@@ -28,13 +48,17 @@ const ChatDetailScreen = ({ navigation, route }) => {
         AsyncStorage.getItem('user').then((data) => {
             setUser(JSON.parse(data));
         });
-
-        async function getMessages() {
-            const response = await ChatAPI.getMessages(chatId);
-            setMessages(response.data);
-        }
-        getMessages();
     }, []);
+
+    useEffect(() => {
+        getMessages();
+    }, [page]);
+
+    handleLoadMore = () => {
+        if (hasMore && !loading) {
+            setPage(prevPage => prevPage + 1);
+        }
+    }
 
     useEffect(() => {
         if (socket) {
@@ -88,8 +112,8 @@ const ChatDetailScreen = ({ navigation, route }) => {
 
                         const base64Image = await readAsStringAsync(manipulatedImage.uri, {
                             encoding: EncodingType.Base64,
-                          });
-                        
+                        });
+
                         const binaryBuffer = Uint8Array.from(atob(base64Image), c => c.charCodeAt(0));
 
                         return binaryBuffer;
@@ -155,6 +179,10 @@ const ChatDetailScreen = ({ navigation, route }) => {
                             return <MessageItem message={item} isSent={isSent} />
                         }}
                         inverted
+                        onEndReached={handleLoadMore}
+                        ListFooterComponent={
+                            loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+                        }
                     />
                 </View>
 
