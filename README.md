@@ -1,4 +1,4 @@
-# Mạng Xã Hội Sức Khỏe
+# Ứng dụng hỗ trợ tư vấn giữa bác sĩ và bệnh nhân
 
 ## Phần 1: Use Case
 
