@@ -12,6 +12,7 @@ import { connectSocket } from '../API/Socket';
 import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from 'expo-image-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { EncodingType, readAsStringAsync } from 'expo-file-system';
+import ApptDialog from '../components/ApptDialog';
 
 const ChatDetailScreen = ({ navigation, route }) => {
     const [socket, setSocket] = useState(null);
@@ -24,6 +25,8 @@ const ChatDetailScreen = ({ navigation, route }) => {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+
+    const [showApptDialog, setShowApptDialog] = useState(false);
 
     const LIMIT = 10;
 
@@ -135,6 +138,7 @@ const ChatDetailScreen = ({ navigation, route }) => {
     return (
         <SafeAreaView className="flex-1 bg-[#f8f1e9]">
             <StatusBar backgroundColor={COLOR.PRIMARY} barStyle='light-content' />
+            <ApptDialog open={showApptDialog} onClose={() => setShowApptDialog(false)} />
             {/* Header */}
             <View className="flex-row items-center justify-between bg-blue-500 px-4 py-2">
                 <TouchableOpacity
@@ -194,7 +198,7 @@ const ChatDetailScreen = ({ navigation, route }) => {
                     {/* Icon hình ảnh */}
                     <FontAwesome name="image" size={24} color={COLOR.PRIMARY} />
                 </TouchableOpacity>
-                <TouchableOpacity className="mr-3">
+                <TouchableOpacity onPress={() => setShowApptDialog(true)} className="mr-3">
                     <FontAwesome name="calendar" size={24} color={COLOR.PRIMARY} />
                 </TouchableOpacity>
                 <TextInput

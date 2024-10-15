@@ -20,7 +20,6 @@ const ImageMessageItem = ({ message, isSent }) => {
             ${isSent ? 'self-end' : 'self-start'}
         `}>
             {imageUris.map((image, index) => (
-                console.log(image),
                 <TouchableOpacity
                     className={`${images.length === 1 ? 'w-3/4 h-64' : 'w-32 h-32'}`}
                     key={index} onPress={() => openImageViewer(index)}>
