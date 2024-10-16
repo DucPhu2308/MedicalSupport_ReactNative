@@ -4,7 +4,8 @@ import { View, Text, StyleSheet } from 'react-native';
 const IntroScreen = ({ navigation }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace('Login'); // Chuyển sang CreatePostScreen sau 10 giây
+      //navigation.replace('Login'); // Chuyển sang CreatePostScreen sau 10 giây
+      navigation.replace('Nav'); // Chuyển sang HomeScreen
     }, 1000); // Chuyển sang HomeScreen sau 10 giây
 
     return () => clearTimeout(timer); // Xóa timer khi component unmount

@@ -11,6 +11,7 @@ import CreatePostScreen from "./screens/CreatePostScreen";
 import AppointmentScreen from "./screens/AppointmentScreen";
 import AppointmentDetailScreen from "./screens/AppointmentDetailScreen";
 import ChatDetailScreen from './screens/ChatDetailScreen';
+import PostComment from './components/PostComment';
 
 const Stack = createNativeStackNavigator();
 
@@ -72,6 +73,7 @@ export default function App() {
           component={CreatePostScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="PostComment" component={PostComment} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
