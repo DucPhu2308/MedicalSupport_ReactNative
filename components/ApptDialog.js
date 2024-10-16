@@ -5,8 +5,9 @@ import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
 import { Button, Dialog } from "react-native-paper";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { AppointmentStatus } from "../API/ChatAPI";
 
-const ApptDialog = ({ open, onClose, appt }) => {
+const ApptDialog = ({ open, onClose, appt, createAppt }) => {
     const [datetime, setDatetime] = useState(appt?.date || new Date());
 
     const [title, setTitle] = useState(appt?.title || "");
@@ -49,7 +50,7 @@ const ApptDialog = ({ open, onClose, appt }) => {
                         {view === ApptFormModalView.CREATE && (
                             <>
                                 <TextInput className="border border-gray-300 rounded-lg p-2 mb-4" placeholder="Tiêu đề" value={title} onChange={setTitle} />
-                                <TextInput className="border border-gray-300 rounded-lg p-2 mb-4" placeholder="Nội dung" value={content} onChange={setContent} />
+                                <TextInput multiline className="border border-gray-300 rounded-lg p-2 mb-4 max-h-28" placeholder="Nội dung" value={content} onChange={setContent} />
                                 <View className="border border-gray-300 rounded-lg p-2 mb-4 flex-row justify-between">
                                     <TextInput className="text-black" placeholder="Thời gian" value={formatDate(datetime, 'HH:mm dd/MM/yyyy')} readOnly />
                                     <TouchableOpacity onPress={() => setShowDatePicker(true)}>
@@ -60,10 +61,18 @@ const ApptDialog = ({ open, onClose, appt }) => {
                         )}
 
                     </View>
-                    <View className="flex-row justify-between">
+                    <View className="flex-row justify-around">
                         <TouchableOpacity className="bg-blue-500 rounded-lg p-3" onPress={onClose}>
                             <Text className="text-white font-bold">Close</Text>
                         </TouchableOpacity>
+                        {view === ApptFormModalView.CREATE && (
+                            <TouchableOpacity className="bg-blue-500 rounded-lg p-3" onPress={() => {
+                                onClose();
+                                createAppt({ title, content, date: datetime, apptStatus: AppointmentStatus.PENDING });
+                            }}>
+                                <Text className="text-white font-bold">Create</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             </View>

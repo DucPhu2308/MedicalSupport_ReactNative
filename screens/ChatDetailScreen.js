@@ -20,7 +20,7 @@ const ChatDetailScreen = ({ navigation, route }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const messageListRef = useRef(null);
-    const { chatId } = route.params;
+    const { chatId, friend } = route.params;
 
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -73,6 +73,15 @@ const ChatDetailScreen = ({ navigation, route }) => {
             });
         }
     }, [socket]);
+
+    const createAppt = async (appt) => {
+        socket.emit('send-message', {
+            chat: chatId,
+            content: appt,
+            type: MessageType.APPOINTMENT,
+        });
+        setShowApptDialog(false);
+    }
 
     const handleSendMessage = async () => {
         if (newMessage.trim()) {
@@ -138,7 +147,7 @@ const ChatDetailScreen = ({ navigation, route }) => {
     return (
         <SafeAreaView className="flex-1 bg-[#f8f1e9]">
             <StatusBar backgroundColor={COLOR.PRIMARY} barStyle='light-content' />
-            <ApptDialog open={showApptDialog} onClose={() => setShowApptDialog(false)} />
+            <ApptDialog createAppt={createAppt} open={showApptDialog} onClose={() => setShowApptDialog(false)} />
             {/* Header */}
             <View className="flex-row items-center justify-between bg-blue-500 px-4 py-2">
                 <TouchableOpacity
@@ -149,12 +158,12 @@ const ChatDetailScreen = ({ navigation, route }) => {
                 <View className="flex-row items-center">
                     <TouchableOpacity>
                         <Image
-                            source={{ uri: 'https://via.placeholder.com/50' }}
+                            source={{ uri: friend.avatar }}
                             className="w-10 h-10 rounded-full"
                         />
                     </TouchableOpacity>
                     <View className="ml-3">
-                        <Text className="text-white font-bold">Username</Text>
+                        <Text className="text-white font-bold">{`${friend.firstName} ${friend.lastName}`}</Text>
                         <Text className="text-white text-sm">đang hoạt động</Text>
                     </View>
                 </View>
