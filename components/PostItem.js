@@ -29,8 +29,8 @@ const PostItem = ({ post }) => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0); // Selected image index
     const [selectedEmotion, setSelectedEmotion] = useState(null); // Selected emotion
     const [showEmotions, setShowEmotions] = useState(false); // Toggle emotion icons
-    const [commentsCount, setCommentsCount] = useState(post.comments.length); // Comments count
-    const [reactionCount, setReactionCount] = useState(post.reactions.length); // Reactions count
+    const [commentsCount, setCommentsCount] = useState(post.comments?.length); // Comments count
+    // const [reactionCount, setReactionCount] = useState(post.reactions.length); // Reactions count
     const [user, setUser] = useState(null);
 
     const getUser = async () => {
@@ -45,12 +45,12 @@ const PostItem = ({ post }) => {
 
     useEffect(() => {
         getUser();
-        setCommentsCount(post.comments.length);
+        setCommentsCount(post.comments?.length);
         setSelectedEmotion(
             post.lovedBy.some((user) => user._id === user?._id) ? emotions[1] : null || 
             post.likedBy.some((user) => user._id === user?._id) ? emotions[0] : null ||
             post.surprisedBy.some((user) => user._id === user?._id) ? emotions[0] : null);
-    }, [post.comments.length, post.likedBy]);
+    }, [post.comments?.length, post.likedBy]);
 
     const openImageViewer = (index) => {
         setSelectedImageIndex(index); // Đặt ảnh được chọn

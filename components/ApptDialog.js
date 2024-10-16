@@ -49,8 +49,17 @@ const ApptDialog = ({ open, onClose, appt, createAppt }) => {
                     <View>
                         {view === ApptFormModalView.CREATE && (
                             <>
-                                <TextInput className="border border-gray-300 rounded-lg p-2 mb-4" placeholder="Tiêu đề" value={title} onChange={setTitle} />
-                                <TextInput multiline className="border border-gray-300 rounded-lg p-2 mb-4 max-h-28" placeholder="Nội dung" value={content} onChange={setContent} />
+                                <TextInput 
+                                    className="border border-gray-300 rounded-lg p-2 mb-4" 
+                                    placeholder="Tiêu đề" 
+                                    value={title} 
+                                    onChangeText={setTitle} />
+                                <TextInput 
+                                    multiline 
+                                    className="border border-gray-300 rounded-lg p-2 mb-4 max-h-28" 
+                                    placeholder="Nội dung" 
+                                    value={content} 
+                                    onChangeText={setContent} />
                                 <View className="border border-gray-300 rounded-lg p-2 mb-4 flex-row justify-between">
                                     <TextInput className="text-black" placeholder="Thời gian" value={formatDate(datetime, 'HH:mm dd/MM/yyyy')} readOnly />
                                     <TouchableOpacity onPress={() => setShowDatePicker(true)}>
@@ -67,8 +76,8 @@ const ApptDialog = ({ open, onClose, appt, createAppt }) => {
                         </TouchableOpacity>
                         {view === ApptFormModalView.CREATE && (
                             <TouchableOpacity className="bg-blue-500 rounded-lg p-3" onPress={() => {
+                                createAppt({ title: title, content: content, date: datetime, apptStatus: AppointmentStatus.PENDING });
                                 onClose();
-                                createAppt({ title, content, date: datetime, apptStatus: AppointmentStatus.PENDING });
                             }}>
                                 <Text className="text-white font-bold">Create</Text>
                             </TouchableOpacity>

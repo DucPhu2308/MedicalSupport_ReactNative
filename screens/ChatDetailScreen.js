@@ -74,7 +74,7 @@ const ChatDetailScreen = ({ navigation, route }) => {
         }
     }, [socket]);
 
-    const createAppt = async (appt) => {
+    const createAppt = (appt) => {
         socket.emit('send-message', {
             chat: chatId,
             content: appt,
