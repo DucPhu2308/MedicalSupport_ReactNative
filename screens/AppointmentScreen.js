@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { AppointmentAPI } from "../API/AppointmentAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const months = [
   { label: "Tháng 1", value: "1" },
@@ -38,24 +39,41 @@ const AppointmentScreen = ({ navigation }) => {
   const [selectedYear, setSelectedYear] = useState("");
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
+
+  const getUserId = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("user");
+      if (userData !== null) {
+        const user = JSON.parse(userData);
+        const userId = user._id;
+        return userId;
+      }
+    } catch (error) {
+      console.error("Error retrieving user data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchUserIdAndAppointments = async () => {
       try {
         setLoading(true);
+        const id = await getUserId();
+        setUserId(id); // Cập nhật userId trong state
+
         const response = await AppointmentAPI.getAppointmentBySenderId();
         const currentDate = new Date();
 
-        // Filter out past appointments and sort by goingDateTime in ascending order
+        // Filter out past appointments and sort by Date in ascending order
         const upcomingAppointments = response.data
-            .filter(appointment => new Date(appointment.goingDateTime) > currentDate)
-            .sort((a, b) => new Date(a.goingDateTime) - new Date(b.goingDateTime));
+          .filter((appointment) => new Date(appointment.date) > currentDate)
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
 
         setAppointments(upcomingAppointments);
 
         // Set default month and year based on the first upcoming appointment
         if (upcomingAppointments.length > 0) {
-          const firstAppointmentDate = new Date(upcomingAppointments[0].goingDateTime);
+          const firstAppointmentDate = new Date(upcomingAppointments[0].date);
           setSelectedMonth((firstAppointmentDate.getMonth() + 1).toString()); // Months are zero-based
           setSelectedYear(firstAppointmentDate.getFullYear().toString());
         }
@@ -66,102 +84,109 @@ const AppointmentScreen = ({ navigation }) => {
       }
     };
 
-    fetchAppointments();
+    fetchUserIdAndAppointments();
   }, []);
 
   const filteredAppointments = appointments.filter((appointment) => {
-    const appointmentDate = new Date(appointment.goingDateTime);
-    const matchesMonth = appointmentDate.getMonth() + 1 === parseInt(selectedMonth);
-    const matchesYear = appointmentDate.getFullYear() === parseInt(selectedYear);
+    const appointmentDate = new Date(appointment.date);
+    const matchesMonth =
+      appointmentDate.getMonth() + 1 === parseInt(selectedMonth);
+    const matchesYear =
+      appointmentDate.getFullYear() === parseInt(selectedYear);
     return (
-        matchesMonth &&
-        matchesYear &&
-        appointment.title.toLowerCase().includes(searchQuery.toLowerCase())
+      matchesMonth &&
+      matchesYear &&
+      appointment.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
+  const renderAppointment = ({ item }) => {
+    const recipientName =
+      userId === item.sender._id
+        ? `${item.recipient.firstName} ${item.recipient.lastName}`
+        : `${item.sender.firstName} ${item.sender.lastName}`;
 
-  const renderAppointment = ({ item }) => (
+    return (
       <View style={styles.appointmentCard}>
         <View style={styles.dateContainer}>
           <Text style={styles.dayLabel}>Ngày</Text>
-          <Text style={styles.dateText}>
-            {new Date(item.goingDateTime).getDate()}
-          </Text>
+          <Text style={styles.dateText}>{new Date(item.date).getDate()}</Text>
         </View>
         <View style={styles.detailsContainer}>
           <Text style={styles.titleText}>Tiêu đề: {item.title}</Text>
           <Text style={styles.timeText}>
             Thời gian:{" "}
-            {new Date(item.goingDateTime).toLocaleTimeString("vi-VN", {
+            {new Date(item.date).toLocaleTimeString("vi-VN", {
               timeZone: "UTC",
               hour: "2-digit",
               minute: "2-digit",
             })}
           </Text>
           <Text style={styles.doctorText}>
-            Bạn có cuộc hẹn với {item.recipient.firstName} {item.recipient.lastName}
+            Bạn có cuộc hẹn với {recipientName}
           </Text>
           <TouchableOpacity
-              onPress={() =>
-                  navigation.navigate("AppointmentDetailScreen", { appointment: item })
-              }
+            onPress={() =>
+              navigation.navigate("AppointmentDetailScreen", {
+                appointment: item,
+              })
+            }
           >
             <Text style={styles.detailsLink}>Xem chi tiết</Text>
           </TouchableOpacity>
         </View>
       </View>
-  );
-
+    );
+  };
 
   return (
-      <View style={styles.container}>
-        <View style={styles.searchContainer}>
-          <TextInput
-              style={styles.searchInput}
-              placeholder="Tìm kiếm cuộc hẹn"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-          />
-        </View>
-        <View style={styles.pickerContainer}>
-          <Picker
-              selectedValue={selectedMonth}
-              style={styles.picker}
-              onValueChange={(itemValue) => setSelectedMonth(itemValue)}
-          >
-            {months.map((month) => (
-                <Picker.Item
-                    key={month.value}
-                    label={month.label}
-                    value={month.value}
-                />
-            ))}
-          </Picker>
-          <Picker
-              selectedValue={selectedYear}
-              style={styles.picker}
-              onValueChange={(itemValue) => setSelectedYear(itemValue)}
-          >
-            {years.map((year) => (
-                <Picker.Item
-                    key={year.value}
-                    label={year.label}
-                    value={year.value}
-                />
-            ))}
-          </Picker>
-        </View>
-        {loading ? (
-            <Text>Loading...</Text>
-        ) : (
-            <FlatList
-                data={filteredAppointments}
-                renderItem={renderAppointment}
-                keyExtractor={(item) => item._id}
-            />
-        )}
+    <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Tìm kiếm cuộc hẹn"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
       </View>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={selectedMonth}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSelectedMonth(itemValue)}
+        >
+          {months.map((month) => (
+            <Picker.Item
+              key={month.value}
+              label={month.label}
+              value={month.value}
+            />
+          ))}
+        </Picker>
+        <Picker
+          selectedValue={selectedYear}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSelectedYear(itemValue)}
+        >
+          {years.map((year) => (
+            <Picker.Item
+              key={year.value}
+              label={year.label}
+              value={year.value}
+            />
+          ))}
+        </Picker>
+      </View>
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <FlatList
+          data={filteredAppointments}
+          renderItem={renderAppointment}
+          keyExtractor={(item) => item._id}
+        />
+      )}
+    </View>
   );
 };
 
