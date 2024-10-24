@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  RefreshControl,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { AppointmentAPI } from "../API/AppointmentAPI";
@@ -39,6 +40,7 @@ const AppointmentScreen = ({ navigation }) => {
   const [selectedYear, setSelectedYear] = useState("");
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [userId, setUserId] = useState(null);
 
   const getUserId = async () => {
@@ -54,38 +56,46 @@ const AppointmentScreen = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    const fetchUserIdAndAppointments = async () => {
-      try {
-        setLoading(true);
-        const id = await getUserId();
-        setUserId(id); // Cập nhật userId trong state
+  const fetchAppointments = useCallback(async () => {
+    try {
+      setLoading(true);
+      setUserId(await getUserId());
 
-        const response = await AppointmentAPI.getAppointmentBySenderId();
-        const currentDate = new Date();
+      const response = await AppointmentAPI.getAppointmentBySenderId();
+      const currentDate = new Date();
 
-        // Filter out past appointments and sort by Date in ascending order
-        const upcomingAppointments = response.data
-          .filter((appointment) => new Date(appointment.date) > currentDate)
-          .sort((a, b) => new Date(a.date) - new Date(b.date));
+      const upcomingAppointments = response.data
+        .filter(
+          (appointment) =>
+            new Date(appointment.date) > currentDate &&
+            (appointment.sender._id == userId ||
+              appointment.recipient._id == userId)
+        )
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        setAppointments(upcomingAppointments);
+      setAppointments(upcomingAppointments);
 
-        // Set default month and year based on the first upcoming appointment
-        if (upcomingAppointments.length > 0) {
-          const firstAppointmentDate = new Date(upcomingAppointments[0].date);
-          setSelectedMonth((firstAppointmentDate.getMonth() + 1).toString()); // Months are zero-based
-          setSelectedYear(firstAppointmentDate.getFullYear().toString());
-        }
-      } catch (error) {
-        console.error("Failed to fetch appointments:", error);
-      } finally {
-        setLoading(false);
+      if (upcomingAppointments.length > 0) {
+        const firstAppointmentDate = new Date(upcomingAppointments[0].date);
+        setSelectedMonth((firstAppointmentDate.getMonth() + 1).toString());
+        setSelectedYear(firstAppointmentDate.getFullYear().toString());
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch appointments:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
 
-    fetchUserIdAndAppointments();
-  }, []);
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchAppointments();
+    setRefreshing(false);
+  };
 
   const filteredAppointments = appointments.filter((appointment) => {
     const appointmentDate = new Date(appointment.date);
@@ -184,6 +194,9 @@ const AppointmentScreen = ({ navigation }) => {
           data={filteredAppointments}
           renderItem={renderAppointment}
           keyExtractor={(item) => item._id}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       )}
     </View>
