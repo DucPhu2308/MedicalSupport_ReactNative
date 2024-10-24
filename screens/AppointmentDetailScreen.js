@@ -6,7 +6,6 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Thông tin chi tiết</Text>
       <Text style={styles.detailText}>Tiêu đề: {appointment.title}</Text>
       <Text style={styles.detailText}>
         Thời gian:{" "}
@@ -20,6 +19,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
         Người nhận: {appointment.recipient.firstName}{" "}
         {appointment.recipient.lastName}
       </Text>
+      <Text style={styles.detailText}>Nội dung: {appointment.content}</Text>
       <View style={styles.buttonContainer}>
         <Button
           title="Quay lại"
