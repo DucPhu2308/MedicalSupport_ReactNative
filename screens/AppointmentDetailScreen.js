@@ -1,10 +1,25 @@
 import React from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
 
-const AppointmentDetailScreen = ({ navigation }) => {
+const AppointmentDetailScreen = ({ route, navigation }) => {
+  const { appointment } = route.params;
+
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Thông tin chi tiết</Text>
+      <Text style={styles.detailText}>Tiêu đề: {appointment.title}</Text>
+      <Text style={styles.detailText}>
+        Thời gian:{" "}
+        {new Date(appointment.date).toLocaleTimeString("vi-VN", {
+          timeZone: "UTC",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </Text>
+      <Text style={styles.detailText}>
+        Người nhận: {appointment.recipient.firstName}{" "}
+        {appointment.recipient.lastName}
+      </Text>
+      <Text style={styles.detailText}>Nội dung: {appointment.content}</Text>
       <View style={styles.buttonContainer}>
         <Button
           title="Quay lại"
@@ -28,6 +43,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
+  },
+  detailText: {
+    fontSize: 18,
+    marginBottom: 10,
   },
   buttonContainer: {
     flexDirection: "row",

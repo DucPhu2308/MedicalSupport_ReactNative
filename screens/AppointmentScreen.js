@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,14 +6,11 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  RefreshControl,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-
-const appointments = [
-  { id: "1", date: "12", time: "15:00", doctor: "BS CK1. Nguyễn Đức Phú" },
-  { id: "2", date: "18", time: "8:00", doctor: "Nhật Nam" },
-  { id: "3", date: "21", time: "8:00", doctor: "BS CK1. Nguyễn Đức Phú" },
-];
+import { AppointmentAPI } from "../API/AppointmentAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const months = [
   { label: "Tháng 1", value: "1" },
@@ -39,30 +36,118 @@ const years = [
 
 const AppointmentScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("7");
-  const [selectedYear, setSelectedYear] = useState("2024");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+  const getUserId = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("user");
+      if (userData !== null) {
+        const user = JSON.parse(userData);
+        const userId = user._id;
+        return userId;
+      }
+    } catch (error) {
+      console.error("Error retrieving user data:", error);
+    }
+  };
+
+  const fetchAppointments = useCallback(async () => {
+    try {
+      setLoading(true);
+      setUserId(await getUserId());
+
+      const response = await AppointmentAPI.getAppointmentBySenderId();
+      const currentDate = new Date();
+
+      const upcomingAppointments = response.data
+        .filter(
+          (appointment) =>
+            new Date(appointment.date) > currentDate &&
+            (appointment.sender._id == userId ||
+              appointment.recipient._id == userId)
+        )
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      setAppointments(upcomingAppointments);
+
+      if (upcomingAppointments.length > 0) {
+        const firstAppointmentDate = new Date(upcomingAppointments[0].date);
+        setSelectedMonth((firstAppointmentDate.getMonth() + 1).toString());
+        setSelectedYear(firstAppointmentDate.getFullYear().toString());
+      }
+    } catch (error) {
+      console.error("Failed to fetch appointments:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchAppointments();
+    setRefreshing(false);
+  };
 
   const filteredAppointments = appointments.filter((appointment) => {
-    return appointment.doctor.toLowerCase().includes(searchQuery.toLowerCase());
+    const appointmentDate = new Date(appointment.date);
+    const matchesMonth =
+      appointmentDate.getMonth() + 1 === parseInt(selectedMonth);
+    const matchesYear =
+      appointmentDate.getFullYear() === parseInt(selectedYear);
+    return (
+      matchesMonth &&
+      matchesYear &&
+      appointment.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   });
 
-  const renderAppointment = ({ item }) => (
-    <View style={styles.appointmentCard}>
-      <View style={styles.dateContainer}>
-        <Text style={styles.dayLabel}>Ngày</Text>
-        <Text style={styles.dateText}>{item.date}</Text>
+  const renderAppointment = ({ item }) => {
+    const recipientName =
+      userId === item.sender._id
+        ? `${item.recipient.firstName} ${item.recipient.lastName}`
+        : `${item.sender.firstName} ${item.sender.lastName}`;
+
+    return (
+      <View style={styles.appointmentCard}>
+        <View style={styles.dateContainer}>
+          <Text style={styles.dayLabel}>Ngày</Text>
+          <Text style={styles.dateText}>{new Date(item.date).getDate()}</Text>
+        </View>
+        <View style={styles.detailsContainer}>
+          <Text style={styles.titleText}>Tiêu đề: {item.title}</Text>
+          <Text style={styles.timeText}>
+            Thời gian:{" "}
+            {new Date(item.date).toLocaleTimeString("vi-VN", {
+              timeZone: "UTC",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Text>
+          <Text style={styles.doctorText}>
+            Bạn có cuộc hẹn với {recipientName}
+          </Text>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("AppointmentDetailScreen", {
+                appointment: item,
+              })
+            }
+          >
+            <Text style={styles.detailsLink}>Xem chi tiết</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.detailsContainer}>
-        <Text style={styles.timeText}>Thời gian: {item.time}</Text>
-        <Text style={styles.doctorText}>Bạn có cuộc hẹn với {item.doctor}</Text>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("AppointmentDetailScreen")}
-        >
-          <Text style={styles.detailsLink}>Xem chi tiết</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -102,11 +187,18 @@ const AppointmentScreen = ({ navigation }) => {
           ))}
         </Picker>
       </View>
-      <FlatList
-        data={filteredAppointments}
-        renderItem={renderAppointment}
-        keyExtractor={(item) => item.id}
-      />
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <FlatList
+          data={filteredAppointments}
+          renderItem={renderAppointment}
+          keyExtractor={(item) => item._id}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        />
+      )}
     </View>
   );
 };
@@ -168,6 +260,11 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 14,
+    marginBottom: 5,
+  },
+  titleText: {
+    fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 5,
   },
   doctorText: {

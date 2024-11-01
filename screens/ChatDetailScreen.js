@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { styled } from 'nativewind';
 import { FontAwesome } from '@expo/vector-icons';
@@ -12,18 +12,23 @@ import { connectSocket } from '../API/Socket';
 import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from 'expo-image-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { EncodingType, readAsStringAsync } from 'expo-file-system';
+import ApptDialog from '../components/ApptDialog';
+import { useSocket } from '../contexts/SocketProvider';
+import { useAuth } from '../contexts/AuthContext';
 
 const ChatDetailScreen = ({ navigation, route }) => {
-    const [socket, setSocket] = useState(null);
-    const [user, setUser] = useState(null);
+    const socket = useSocket();
+    const { user } = useAuth();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const messageListRef = useRef(null);
-    const { chatId } = route.params;
+    const { chatId, friend } = route.params;
 
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+
+    const [showApptDialog, setShowApptDialog] = useState(false);
 
     const LIMIT = 10;
 
@@ -41,14 +46,14 @@ const ChatDetailScreen = ({ navigation, route }) => {
         setLoading(false);
     };
 
-    useEffect(() => {
-        connectSocket().then((socket) => {
-            setSocket(socket);
-        });
-        AsyncStorage.getItem('user').then((data) => {
-            setUser(JSON.parse(data));
-        });
-    }, []);
+    // useEffect(() => {
+    //     connectSocket().then((socket) => {
+    //         setSocket(socket);
+    //     });
+    //     AsyncStorage.getItem('user').then((data) => {
+    //         setUser(JSON.parse(data));
+    //     });
+    // }, []);
 
     useEffect(() => {
         getMessages();
@@ -58,18 +63,45 @@ const ChatDetailScreen = ({ navigation, route }) => {
         if (hasMore && !loading) {
             setPage(prevPage => prevPage + 1);
         }
-    }
+    };
 
     useEffect(() => {
         if (socket) {
             socket.on('receive-message', (message) => {
-                console.log('Nhận tin nhắn:', message);
                 setMessages(prevMessages => [message, ...prevMessages]);
                 // scroll to bottom (the list is inverted)
                 messageListRef.current?.scrollToOffset({ animated: true, offset: 0 });
             });
+
+            socket.on('update-message', (message) => {
+                if (message.chat === chatId) {
+                    const newMessages = messages.map((msg) => {
+                        if (msg._id === message._id) {
+                            return message;
+                        }
+                        return msg;
+                    });
+                    setMessages(newMessages);
+                }
+            });
         }
-    }, [socket]);
+
+        return () => {
+            if (socket) {
+                socket.off('receive-message');
+                socket.off('update-message');
+            }
+        };
+    }, [socket, messages]);
+
+    const createAppt = (appt) => {
+        socket.emit('send-message', {
+            chat: chatId,
+            content: appt,
+            type: MessageType.APPOINTMENT,
+        });
+        setShowApptDialog(false);
+    };
 
     const handleSendMessage = async () => {
         if (newMessage.trim()) {
@@ -135,6 +167,7 @@ const ChatDetailScreen = ({ navigation, route }) => {
     return (
         <SafeAreaView className="flex-1 bg-[#f8f1e9]">
             <StatusBar backgroundColor={COLOR.PRIMARY} barStyle='light-content' />
+            <ApptDialog createAppt={createAppt} open={showApptDialog} onClose={() => setShowApptDialog(false)} />
             {/* Header */}
             <View className="flex-row items-center justify-between bg-blue-500 px-4 py-2">
                 <TouchableOpacity
@@ -145,12 +178,12 @@ const ChatDetailScreen = ({ navigation, route }) => {
                 <View className="flex-row items-center">
                     <TouchableOpacity>
                         <Image
-                            source={{ uri: 'https://via.placeholder.com/50' }}
+                            source={{ uri: friend.avatar }}
                             className="w-10 h-10 rounded-full"
                         />
                     </TouchableOpacity>
                     <View className="ml-3">
-                        <Text className="text-white font-bold">Username</Text>
+                        <Text className="text-white font-bold">{`${friend.firstName} ${friend.lastName}`}</Text>
                         <Text className="text-white text-sm">đang hoạt động</Text>
                     </View>
                 </View>
@@ -194,7 +227,7 @@ const ChatDetailScreen = ({ navigation, route }) => {
                     {/* Icon hình ảnh */}
                     <FontAwesome name="image" size={24} color={COLOR.PRIMARY} />
                 </TouchableOpacity>
-                <TouchableOpacity className="mr-3">
+                <TouchableOpacity onPress={() => setShowApptDialog(true)} className="mr-3">
                     <FontAwesome name="calendar" size={24} color={COLOR.PRIMARY} />
                 </TouchableOpacity>
                 <TextInput

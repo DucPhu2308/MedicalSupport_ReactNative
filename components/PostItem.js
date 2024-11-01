@@ -1,25 +1,91 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import ImageViewing from 'react-native-image-viewing';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { CommentAPI } from '../API/CommentAPI';
+import PostAPI from '../API/PostAPI';
+import PostComment from './PostComment';
+import { set } from 'date-fns';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // Kích hoạt plugin relativeTime
 dayjs.extend(relativeTime);
+
+const emotions = [
+    { id: 1, name: 'Like', icon: 'thumbs-o-up', color: '#1877F2' },
+    { id: 2, name: 'Love', icon: 'heart', color: '#F33E58' },
+    { id: 3, name: 'Haha', icon: 'smile-o', color: '#FFD700' },
+    { id: 4, name: 'Wow', icon: 'surprise', color: '#FFA500' },
+    { id: 5, name: 'Sad', icon: 'frown-o', color: '#1C9CEA' },
+    { id: 6, name: 'Angry', icon: 'angry', color: '#F44336' },
+];
+
 
 const PostItem = ({ post }) => {
     const navigation = useNavigation();
     const [visible, setVisible] = useState(false); // Modal visibility state
     const [selectedImageIndex, setSelectedImageIndex] = useState(0); // Selected image index
+    const [selectedEmotion, setSelectedEmotion] = useState(null); // Selected emotion
+    const [showEmotions, setShowEmotions] = useState(false); // Toggle emotion icons
+    const [commentsCount, setCommentsCount] = useState(post.comments?.length); // Comments count
+    // const [reactionCount, setReactionCount] = useState(post.reactions.length); // Reactions count
+    const [user, setUser] = useState(null);
 
+    const getUser = async () => {
+        try {
+            const user = await AsyncStorage.getItem('user');
+            setUser(JSON.parse(user));
+        } catch (error) {
+            console.error(error); 
+        }
+    };
+
+
+    useEffect(() => {
+        getUser();
+        setCommentsCount(post.comments?.length);
+        setSelectedEmotion(
+            post.lovedBy.some((user) => user._id === user?._id) ? emotions[1] : null || 
+            post.likedBy.some((user) => user._id === user?._id) ? emotions[0] : null ||
+            post.surprisedBy.some((user) => user._id === user?._id) ? emotions[0] : null);
+    }, [post.comments?.length, post.likedBy]);
 
     const openImageViewer = (index) => {
         setSelectedImageIndex(index); // Đặt ảnh được chọn
         setVisible(true); // Hiện modal
     };
 
+    const handleEmotionSelect = (emotion) => {
+        try {
+            const data = {
+                type: emotion.name,
+            };
+            PostAPI.reactPost(post._id, data)
+                .then((response) => {
+                    setSelectedEmotion(emotion); // Set selected emotion
+                    setShowEmotions(false); // Hide emotion icons
+                })
+        }
+        catch (error) {
+            console.error(error);
+        }
+
+    };
+
+    const handleLike = () => {
+        // Nếu đã chọn cảm xúc, click thường sẽ reset về trạng thái chưa chọn
+        if (selectedEmotion) {
+            setSelectedEmotion(null); // Reset về trạng thái Like mặc định (đen)
+        } else {
+            setSelectedEmotion(emotions[0]); // Nếu chưa chọn, thì chọn Like
+        }
+    };
+
+    const handleLongPress = () => {
+        setShowEmotions(true); // Hiện danh sách cảm xúc
+    };
 
     const renderImages = (images) => {
         const imageCount = images.length;
@@ -154,6 +220,11 @@ const PostItem = ({ post }) => {
 
     };
 
+    const handleCommentPress = () => {
+        navigation.navigate('PostComment', { post });
+    };
+
+
     const formatTime = (createdAt) => {
         return dayjs(createdAt).fromNow();
     };
@@ -161,6 +232,7 @@ const PostItem = ({ post }) => {
     return (
         <View className="bg-orange-100 p-4 rounded-lg m-1">
             {/* Header */}
+
             <View className="flex-row justify-between items-center">
                 {/* Avatar and user info */}
                 <View className="flex-row items-center">
@@ -209,19 +281,65 @@ const PostItem = ({ post }) => {
                 onRequestClose={() => setVisible(false)}
             />
 
+            <View className="flex-row mt-3 justify-between items-center">
+                {/* Emotion Button */}
+                <View>
+                    <Text>
+                        5 lượt thích
+                    </Text>
+                </View>
+                <View>
+                    <Text>
+                        {commentsCount} bình luận
+                    </Text>
+                </View>
+            </View>
+            {/* Emotion List */}
+            {showEmotions && (
+                <View style={{ flexDirection: 'row', marginTop: 4 }}>
+                    {emotions.map((emotion) => (
+                        <TouchableOpacity
+                            key={emotion.id}
+                            onPress={() => handleEmotionSelect(emotion)}
+                            style={{ marginHorizontal: 4 }}
+                        >
+                            <FontAwesome name={emotion.icon} size={28} color={emotion.color} />
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            )}
             {/* Footer */}
             <View className="flex-row mt-3 justify-between items-center">
-                {/* Like Button */}
-                <TouchableOpacity className="flex-row items-center">
-                    <FontAwesome name={'thumbs-o-up'} size={24} color={'gray'} />
-                    <Text className="ml-2 text-gray-700">Like</Text>
-                </TouchableOpacity>
+                {/* Emotion Button */}
+                <View>
+                    <TouchableOpacity
+                        className="flex-row items-center"
+                        onPress={handleLike} // Xử lý nhấn ngắn
+                        onLongPress={handleLongPress} // Xử lý giữ lâu
+                    >
+                        {selectedEmotion ? (
+                            <FontAwesome name={selectedEmotion.icon} size={24} color={selectedEmotion.color} />
+                        ) : (
+                            <FontAwesome name={'thumbs-o-up'} size={24} color={'gray'} />
+                        )}
+                        <Text className="ml-2 text-gray-700">
+                            {selectedEmotion ? selectedEmotion.name : 'Like'}
+                        </Text>
+                    </TouchableOpacity>
+
+
+                </View>
 
                 {/* Comment Button */}
-                <TouchableOpacity className="flex-row items-center">
-                    <FontAwesome name="comment-o" size={24} color="gray" />
-                    <Text className="ml-2 text-gray-700">Comment</Text>
-                </TouchableOpacity>
+                {/* Toggle comments section */}
+                <View className="flex-row mt-3 justify-between items-center">
+                    <TouchableOpacity className="flex-row items-center" onPress={handleCommentPress}>
+                        <FontAwesome name="comment-o" size={24} color="gray" />
+                        <Text className="ml-2 text-gray-700">Bình luận</Text>
+                    </TouchableOpacity>
+                </View>
+
+
             </View>
         </View>
     );

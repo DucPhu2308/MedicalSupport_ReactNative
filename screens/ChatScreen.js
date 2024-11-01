@@ -86,7 +86,7 @@ function ChatScreen({ navigation }) {
           renderItem={({ item }) => {
             const friend = item.participants.find((participant) => participant._id !== user._id);
             return <ChatItem avatarUrl={friend.avatar}
-              onPress={() => navigation.navigate('ChatDetail', { chatId: item._id })}
+              onPress={() => navigation.navigate('ChatDetail', { chatId: item._id, friend })}
               username={`${friend.firstName} ${friend.lastName}`}
               lastMessage={item.lastMessage} />;
           }}

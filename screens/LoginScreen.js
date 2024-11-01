@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, TextInput, Button, Pressable, ImageBackground, 
 import AuthAPI from "../API/AuthAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DefaultLayoutLogReg from "../layouts/DefaultLayoutLogReg";
+import { useAuth } from "../contexts/AuthContext";
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { updateUser, updateToken } = useAuth();
 
 
   const handleLogin = () => {
@@ -22,8 +24,10 @@ const LoginScreen = ({ navigation }) => {
     AuthAPI.login(data)
       .then(response => {
         console.log(response.data);
-        AsyncStorage.setItem('token', response.data.token);
-        AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+        // AsyncStorage.setItem('token', response.data.token);
+        // AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+        updateToken(response.data.token);
+        updateUser(response.data.user);
         navigation.replace('Nav');
       })
       .catch(error => {
