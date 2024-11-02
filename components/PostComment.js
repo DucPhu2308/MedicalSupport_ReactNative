@@ -4,63 +4,23 @@ import { CommentAPI } from '../API/CommentAPI';
 import { useRoute } from '@react-navigation/native';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { set } from 'date-fns';
-// Sample comments with nested replies structure
-const commentsData = [
-  {
-    id: 1,
-    username: 'Lê Đình Hiếu',
-    text: 'Khi nào đội bóng cần giữ nguyên tỉ số cứ alo Văn Toàn vì Toàn Hoà chứ thắng đâu 😆',
-    likes: 41,
-    replies: [
-      {
-        id: 2,
-        username: 'Trang',
-        text: 'Lê Đình Hiếu cười nội thương 😂',
-        likes: 0,
-        replies: [],
-      },
-    ],
-  },
-  {
-    id: 3,
-    username: 'Huỳnh Tấn Tiên',
-    text: 'Banh ra thấy chữ công phượng cái mềm xìu lun',
-    likes: 106,
-    replies: [
-      {
-        id: 4,
-        username: 'Lê Như Duyên',
-        text: 'Ở đây tao thấy có nhiều óc chó...',
-        likes: 0,
-        replies: [
-          {
-            id: 5,
-            username: 'Hoàng Long',
-            text: 'T thấy đúng luôn.',
-            likes: 0,
-            replies: [],
-          },
-        ],
-      },
-    ],
-  },
-];
+import * as ImagePicker from 'expo-image-picker';
 
 const PostComment = () => {
-  const [visibleReplies, setVisibleReplies] = useState({}); // To track which comments have visible replies
-  const [newComment, setNewComment] = useState(''); // For input text
-  const [replyingTo, setReplyingTo] = useState(null); // To track which comment or reply we are responding to
-  const [replyingToUsername, setReplyingToUsername] = useState(null); // To track username being replied to
-  const [commentsData, setCommentsData] = useState([]); // To store comments data
-  const route = useRoute(); 
+  const [visibleReplies, setVisibleReplies] = useState({});
+  const [newComment, setNewComment] = useState('');
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyingToUsername, setReplyingToUsername] = useState(null);
+  const [commentsData, setCommentsData] = useState([]);
+  const route = useRoute();
   const { post } = route.params;
 
   const [likeCount, setLikeCount] = useState(0);
   const [loveCount, setLoveCount] = useState(0);
   const [surpriseCount, setSurpriseCount] = useState(0);
   const [user, setUser] = useState(null);
-  
+  const [selectedImage, setSelectedImage] = useState(null); // Holds the URI of the selected image
+
   useEffect(() => {
     const getComments = async () => {
       try {
@@ -80,7 +40,6 @@ const PostComment = () => {
     setSurpriseCount(post.surprisedBy.length);
   }, [post.lovedBy, post.likedBy, post.surprisedBy]);
 
-  // Toggle replies visibility
   const toggleReplies = (commentId) => {
     setVisibleReplies((prev) => ({
       ...prev,
@@ -88,41 +47,35 @@ const PostComment = () => {
     }));
   };
 
-  // Handle reply logic for any comment or reply
   const handleReply = (commentId, username) => {
-    setReplyingTo(commentId); // Set the ID of the comment or reply being replied to
-    setReplyingToUsername(username); // Set the username being replied to
+    setReplyingTo(commentId);
+    setReplyingToUsername(username);
   };
 
-  // Handle canceling reply
   const handleCancelReply = () => {
-    setReplyingTo(null); // Reset reply mode
-    setReplyingToUsername(null); // Clear username state
+    setReplyingTo(null);
+    setReplyingToUsername(null);
   };
 
   const getUser = async () => {
-    try{
+    try {
       const user = await AsyncStorage.getItem('user');
-      if(user !== null){
+      if (user !== null) {
         setUser(JSON.parse(user));
       }
-    }
-    catch(error){
+    } catch (error) {
       console.error(error);
     }
-  }
+  };
 
-  // Handle send comment logic
   const addReplyToComment = (comments, commentId, newReply) => {
     return comments.map((comment) => {
       if (comment._id === commentId) {
-        // Add the new reply to the comment's replies array
         return {
           ...comment,
           replies: [...comment.replies, newReply],
         };
       }
-      // Recursively find and add the reply to nested replies
       if (comment.replies.length > 0) {
         return {
           ...comment,
@@ -132,33 +85,44 @@ const PostComment = () => {
       return comment;
     });
   };
-  
+
   const handleSend = () => {
     try {
-      const data = {
-        content: newComment,
-        postId: post._id,
-        userId: user._id,
-        parentCommentId: replyingTo, // Set parentCommentId if replying to a comment
-      };
-  
+      const data = new FormData();
+      data.append('content', newComment);
+      data.append('postId', post._id);
+      data.append('userId', user._id);
+
+      if (replyingTo) {
+        data.append('parentCommentId', replyingTo);
+      }
+
+      if (selectedImage) {
+        data.append('imageContent', {
+          uri: selectedImage,
+          type: 'image/jpeg',
+          name: 'image.jpg',
+        });
+      }
+
+
       CommentAPI.createComment(data)
         .then((response) => {
           const newReply = response.data;
-  
+
           if (replyingTo) {
-            // If replying to a comment, add the reply to the correct comment's replies array
             setCommentsData((prevComments) =>
               addReplyToComment(prevComments, replyingTo, newReply)
             );
           } else {
-            // If not replying, add the comment to the top-level comments array
             setCommentsData((prev) => [...prev, newReply]);
           }
-  
-          setNewComment(''); // Clear input
-          setReplyingTo(null); // Reset reply mode
-          setReplyingToUsername(null); // Clear username state
+
+          setNewComment('');
+          setReplyingTo(null);
+          setReplyingToUsername(null);
+          setSelectedImage(null); 
+
         })
         .catch((error) => {
           console.error(error);
@@ -168,7 +132,29 @@ const PostComment = () => {
     }
   };
 
-  // Recursive function to render nested replies
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+    }
+  };
+
+  const deleteImage = () => {
+    setSelectedImage(null); // Clear the selected image
+  };
+
   const renderReplies = (replies) => {
     return replies.map((reply) => (
       <View key={reply._id} className="pl-6 mt-2">
@@ -180,16 +166,17 @@ const PostComment = () => {
           <View className="ml-2 flex-1">
             <Text className="text-gray-900 font-bold">{reply.author.firstName} {reply.author.lastName}</Text>
             <Text className="text-gray-700">{reply.content}</Text>
+            {reply.image && (
+              <Image source={{ uri: reply.image }} className="w-1/2 h-32 mt-2 rounded-md" />
+            )}
             <View className="flex-row mt-2">
               <TouchableOpacity className="mr-4">
                 <Text className="text-gray-500">Thích {reply.likes}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleReply(reply._id, `${reply.author.firstName}${reply.author.lastName}`)}>
+              <TouchableOpacity onPress={() => handleReply(reply._id, `${reply.author.firstName} ${reply.author.lastName}`)}>
                 <Text className="text-gray-500">Phản hồi</Text>
               </TouchableOpacity>
             </View>
-
-            {/* Render replies recursively */}
             {reply.replies && reply.replies.length > 0 && (
               <View className="border-l border-gray-300 mt-2">
                 {renderReplies(reply.replies)}
@@ -203,16 +190,14 @@ const PostComment = () => {
 
   return (
     <View className="flex-1 mt-4 bg-gray-100">
-      {/* Header with Reactions */}
       <View className="p-4 bg-white flex-row items-center justify-between border-b border-gray-300">
-        <Text className="text-gray-900 font-bold"> 
+        <Text className="text-gray-900 font-bold">
           <FontAwesome name="thumbs-o-up" size={24} color="gray" />
           <FontAwesome name="heart" size={24} color="red" />
-          {loveCount+likeCount+surpriseCount}
+          {loveCount + likeCount + surpriseCount}
         </Text>
       </View>
 
-      {/* Comments Section */}
       <ScrollView className="flex-1">
         {commentsData.map((comment) => (
           <View key={comment._id} className="p-4">
@@ -224,16 +209,17 @@ const PostComment = () => {
               <View className="ml-2 flex-1">
                 <Text className="text-gray-900 font-bold">{comment.author.firstName} {comment.author.lastName}</Text>
                 <Text className="text-gray-700">{comment.content}</Text>
+                {comment.image && (
+                  <Image source={{ uri: comment.image }} className="w-1/2 h-32 mt-2 rounded-md" />
+                )}
                 <View className="flex-row mt-2">
                   <TouchableOpacity className="mr-4">
                     <Text className="text-gray-500">Thích {comment.likes}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleReply(comment._id,`${comment.author.firstName}${comment.author.lastName}`)}>
+                  <TouchableOpacity onPress={() => handleReply(comment._id, `${comment.author.firstName} ${comment.author.lastName}`)}>
                     <Text className="text-gray-500">Phản hồi</Text>
                   </TouchableOpacity>
                 </View>
-
-                {/* Toggle reply visibility */}
                 {comment.replies && (
                   <View className="mt-2">
                     <TouchableOpacity onPress={() => toggleReplies(comment._id)}>
@@ -243,8 +229,6 @@ const PostComment = () => {
                           : `Xem ${comment.replies.length} phản hồi khác...`}
                       </Text>
                     </TouchableOpacity>
-
-                    {/* Render replies if visible */}
                     {visibleReplies[comment._id] && (
                       <View className="border-l border-gray-300 mt-2">
                         {renderReplies(comment.replies)}
@@ -258,7 +242,6 @@ const PostComment = () => {
         ))}
       </ScrollView>
 
-      {/* Footer with Input Form */}
       <View className="p-2 border-t border-gray-300 bg-white">
         {replyingTo && (
           <View className="flex-row items-center justify-between mb-2">
@@ -281,10 +264,23 @@ const PostComment = () => {
             placeholder="Viết bình luận..."
             className="flex-1 mx-2 p-2 border border-gray-300 rounded-full"
           />
+          <TouchableOpacity onPress={pickImage} className="mr-2">
+            <FontAwesome name="image" size={24} color="gray" />
+          </TouchableOpacity>
           <TouchableOpacity onPress={handleSend}>
             <Text className="text-blue-500 font-bold">Gửi</Text>
           </TouchableOpacity>
         </View>
+        {selectedImage && (
+          <View className="mt-2 ml-5 flex-row items-center">
+            <View className="relative">
+              <Image source={{ uri: selectedImage }} className="w-32 h-32 rounded-md" />
+              <TouchableOpacity onPress={deleteImage} className="absolute top-0 right-0 p-1 bg-gray-800 rounded-full">
+                <FontAwesome name="times-circle" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
     </View>
   );

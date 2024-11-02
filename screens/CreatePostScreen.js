@@ -1,9 +1,12 @@
 import { Text, TextInput, TouchableOpacity, View, ScrollView, Image, Modal } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker from Expo
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PostAPI from "../API/PostAPI";
 import { useNavigation } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
+import { DepartmentAPI } from "../API/DepartmentAPI";
+import { set } from "date-fns";
 export default function CreatePostScreen() {
     const [selectedImages, setSelectedImages] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
@@ -12,16 +15,37 @@ export default function CreatePostScreen() {
     const [content, setContent] = useState('');
     const [images, setImages] = useState([]);
     const navigation = useNavigation();
+    const [selectedTopic, setSelectedTopic] = useState('all');
+    const [departments, setDepartments] = useState([]);
+
+    useEffect(() => {
+        DepartmentAPI.getAll().
+            then(response => {
+                setDepartments(response.data);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, []);
 
     const handleCreatePost = () => {
         if (!title || !content) {
             alert('Vui lòng điền đầy đủ thông tin!');
             return;
         }
-
+        let tags = [];
         const formData = new FormData();
         formData.append('title', title);
         formData.append('content', content);
+        if (selectedTopic !== 'all') {
+            formData.append('tags', selectedTopic);
+        }
+        else{
+            departments.forEach((department) => {
+                tags.push(department._id);
+            });
+            formData.append('tags', tags);
+        }
         selectedImages.forEach((image, index) => {
             formData.append('images', {
                 name: `image-${index}.jpg`,
@@ -30,12 +54,15 @@ export default function CreatePostScreen() {
             });
         });
 
+        console.log(selectedImages)
+
         console.log(formData);
 
         PostAPI.createPost(formData)
             .then(response => {
                 console.log(response.data);
                 alert('Đăng bài viết thành công!');
+                navigation.goBack();
             })
             .catch(error => {
                 console.error(error);
@@ -46,7 +73,7 @@ export default function CreatePostScreen() {
     const handleCloseScreenCreatePost = () => {
         navigation.goBack();
     };
-    
+
     // Function to pick an image
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -109,7 +136,7 @@ export default function CreatePostScreen() {
                             value={title}
                             onChangeText={setTitle}
                         />
-                        <ScrollView style={{ maxHeight: 150 }} nestedScrollEnabled={true}> 
+                        <ScrollView style={{ maxHeight: 150 }} nestedScrollEnabled={true}>
                             <TextInput
                                 placeholder="Nhập nội dung bài viết"
                                 multiline
@@ -119,6 +146,28 @@ export default function CreatePostScreen() {
                                 style={{ borderBottomWidth: 2, borderColor: 'gray', padding: 5 }}
                             />
                         </ScrollView>
+
+                        <View className="mt-3">
+                            <Text className="text-sm text-gray-500 mb-1">Chọn chủ đề bài viết</Text>
+                            <View style={{
+                                borderWidth: 1,
+                                borderColor: 'gray',
+                                borderRadius: 10, // Bo tròn góc
+                                overflow: 'hidden',
+                                backgroundColor: '#f9f9f9'
+                            }}>
+                                <Picker
+                                    selectedValue={selectedTopic}
+                                    onValueChange={(itemValue) => setSelectedTopic(itemValue)}
+                                    style={{  color: 'gray' }}
+                                >
+                                    <Picker.Item label="Tất cả" value="all" />
+                                    {departments.map((department) => (
+                                        <Picker.Item key={department._id} label={department.name} value={department._id} />
+                                    ))}
+                                </Picker>
+                            </View>
+                        </View>
 
                         {/* Image Upload */}
                         <View className="flex-row mt-3">
