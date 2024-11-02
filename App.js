@@ -14,73 +14,82 @@ import ChatDetailScreen from './screens/ChatDetailScreen';
 import PostComment from './components/PostComment';
 import { SocketProvider } from "./contexts/SocketProvider";
 import { AuthProvider } from "./contexts/AuthContext";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+import SocketEventListener from "./components/SocketEventListener";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SocketProvider>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="Intro">
-            <Stack.Screen
-              name="Intro"
-              component={IntroScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Register"
-              component={RegisterScreen}
-              options={{ headerShown: false }}
-            />
-            {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
-            <Stack.Screen name="ChatDetail" component={ChatDetailScreen} options={{ headerShown: false }} />
-            <Stack.Screen
-              name="Nav"
-              component={NavigationBar}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="FillOtp"
-              component={FillOtpScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="FillEmail"
-              component={FillEmailScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ResetPassword"
-              component={ResetPasswordScreen}
-              options={{ headerShown: false }}
-            />
-    
-            <Stack.Screen
-              name="AppointmentScreen"
-              component={AppointmentScreen}
-              options={{ title: "Danh sách cuộc hẹn" }}
-            />
-            <Stack.Screen
-              name="AppointmentDetailScreen"
-              component={AppointmentDetailScreen}
-              options={{ title: "Thông tin chi tiết" }}
-            />
-    
-            <Stack.Screen
-              name="CreatePost"
-              component={CreatePostScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name="PostComment" component={PostComment} options={{ headerShown: false }} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SocketProvider>
-    </AuthProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        <SocketProvider>
+          <SafeAreaProvider>
+            <NavigationContainer>
+              <Stack.Navigator initialRouteName="Intro">
+                <Stack.Screen
+                  name="Intro"
+                  component={IntroScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Login"
+                  component={LoginScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Register"
+                  component={RegisterScreen}
+                  options={{ headerShown: false }}
+                />
+                {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
+                <Stack.Screen name="ChatDetail" component={ChatDetailScreen} options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="Nav"
+                  component={NavigationBar}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="FillOtp"
+                  component={FillOtpScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="FillEmail"
+                  component={FillEmailScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="ResetPassword"
+                  component={ResetPasswordScreen}
+                  options={{ headerShown: false }}
+                />
+
+                <Stack.Screen
+                  name="AppointmentScreen"
+                  component={AppointmentScreen}
+                  options={{ title: "Danh sách cuộc hẹn" }}
+                />
+                <Stack.Screen
+                  name="AppointmentDetailScreen"
+                  component={AppointmentDetailScreen}
+                  options={{ title: "Thông tin chi tiết" }}
+                />
+
+                <Stack.Screen
+                  name="CreatePost"
+                  component={CreatePostScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen name="PostComment" component={PostComment} options={{ headerShown: false }} />
+              </Stack.Navigator>
+              <SocketEventListener />
+            </NavigationContainer>
+          </SafeAreaProvider>
+        </SocketProvider>
+      </AuthProvider>
+    </Provider>
   );
 }

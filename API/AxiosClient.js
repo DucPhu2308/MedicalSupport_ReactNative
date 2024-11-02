@@ -4,7 +4,7 @@ import queryString from "query-string";
 import { useNavigation } from "@react-navigation/native";
 
 //const BASE_URL = 'http://192.168.202.135:4000/api';
-const BASE_URL = 'http://172.26.112.1:4000/api';
+const BASE_URL = 'http://192.168.2.14:4000/api';
 // const BASE_URL = 'http://192.168.1.196:4000/api';
 
 const axiosClient = axios.create({

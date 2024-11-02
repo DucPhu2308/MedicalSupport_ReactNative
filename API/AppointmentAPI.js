@@ -6,4 +6,9 @@ export class AppointmentAPI {
         const url = `/appointment`;
         return axiosPrivate.get(url);
     }
+
+    static async getAppointmentById(id) {
+        const url = `/appointment/${id}`;
+        return axiosPrivate.get(url);
+    }
 }

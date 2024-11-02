@@ -40,7 +40,7 @@ const PostDetailScreen = ({ route }) => {
                             className="w-12 h-12 rounded-full"
                         />
                         <View className="ml-3">
-                            <Text className="font-bold">{post.author.firstName} {post.author.lastName}</Text>
+                            <Text className="font-bold">{post.author?.firstName} {post.author?.lastName}</Text>
                             <Text className="text-gray-500 text-xs">{post.createdAt}</Text>
                         </View>
                     </View>
@@ -69,7 +69,7 @@ const PostDetailScreen = ({ route }) => {
                 </View>
 
                 {/* Image */}
-                {post.images.length > 0 && (
+                {post.images?.length > 0 && (
                     <Image
                         source={{ uri: post.images[0] }} // Thay bằng link ảnh
                         className="w-full h-48 rounded-lg mt-3"
