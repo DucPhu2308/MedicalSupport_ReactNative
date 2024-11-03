@@ -14,6 +14,10 @@ import ChatDetailScreen from './screens/ChatDetailScreen';
 import PostComment from './components/PostComment';
 import { SocketProvider } from "./contexts/SocketProvider";
 import { AuthProvider } from "./contexts/AuthContext";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ListUserFollowScreen from "./screens/ListUserFollowScreen";
+import UpdateProfileScreen from "./screens/UpdateProfileScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +26,7 @@ export default function App() {
     <AuthProvider>
       <SocketProvider>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="Intro">
+          <Stack.Navigator initialRouteName="Nav">
             <Stack.Screen
               name="Intro"
               component={IntroScreen}
@@ -78,6 +82,8 @@ export default function App() {
               options={{ headerShown: false }}
             />
             <Stack.Screen name="PostComment" component={PostComment} options={{ headerShown: false }} />
+            <Stack.Screen name="ListUserFollow" component={ListUserFollowScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="UpdateProfile" component={UpdateProfileScreen} options={{ headerShown: false }} />
           </Stack.Navigator>
         </NavigationContainer>
       </SocketProvider>
