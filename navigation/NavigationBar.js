@@ -12,15 +12,18 @@ import NotificationScreen from "../screens/NotificationScreen";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "../redux/slices/notificationSlice";
+import { getUnreadCount } from "../redux/slices/chatSlice";
 
 const Tab = createBottomTabNavigator();
 
 const NavigationBar = () => {
   const dispatch = useDispatch();
   const unreadCount = useSelector((state) => state.notification.unreadCount);
+  const unreadChatCount = useSelector((state) => state.chat.unreadChatCount);
 
   useEffect(() => {
     dispatch(fetchNotifications());
+    dispatch(getUnreadCount());
   }, []);
 
   return (
@@ -50,7 +53,11 @@ const NavigationBar = () => {
         })}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Chat" component={ChatScreen} />
+        <Tab.Screen name="Chat" component={ChatScreen}
+          options={{
+            tabBarBadge: unreadChatCount > 0 ? unreadChatCount : null,
+          }}
+        />
         <Tab.Screen name="Appointment" component={AppointmentScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="Notification" component={NotificationScreen} 
