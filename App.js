@@ -14,6 +14,8 @@ import ChatDetailScreen from './screens/ChatDetailScreen';
 import PostComment from './components/PostComment';
 import { SocketProvider } from "./contexts/SocketProvider";
 import { AuthProvider } from "./contexts/AuthContext";
+import ListUserFollowScreen from "./screens/ListUserFollowScreen";
+import UpdateProfileScreen from "./screens/UpdateProfileScreen";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import SocketEventListener from "./components/SocketEventListener";
@@ -84,6 +86,8 @@ export default function App() {
                   options={{ headerShown: false }}
                 />
                 <Stack.Screen name="PostComment" component={PostComment} options={{ headerShown: false }} />
+                <Stack.Screen name="ListUserFollow" component={ListUserFollowScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="UpdateProfile" component={UpdateProfileScreen} options={{ headerShown: false }} />
               </Stack.Navigator>
               <SocketEventListener />
             </NavigationContainer>

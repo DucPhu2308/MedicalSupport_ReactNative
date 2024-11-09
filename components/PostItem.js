@@ -1,15 +1,16 @@
 import { View, Text, Image, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import ImageViewing from 'react-native-image-viewing';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CommentAPI } from '../API/CommentAPI';
 import PostAPI from '../API/PostAPI';
 import PostComment from './PostComment';
 import { set } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 // Kích hoạt plugin relativeTime
 dayjs.extend(relativeTime);
 
@@ -30,7 +31,7 @@ const PostItem = ({ post }) => {
     const [selectedEmotion, setSelectedEmotion] = useState(null); // Selected emotion
     const [showEmotions, setShowEmotions] = useState(false); // Toggle emotion icons
     const [commentsCount, setCommentsCount] = useState(post.comments?.length); // Comments count
-    // const [reactionCount, setReactionCount] = useState(post.reactions.length); // Reactions count
+    const [reactionCount, setReactionCount] = useState(0); // Reactions count
     const [user, setUser] = useState(null);
 
     const getUser = async () => {
@@ -38,18 +39,18 @@ const PostItem = ({ post }) => {
             const user = await AsyncStorage.getItem('user');
             setUser(JSON.parse(user));
         } catch (error) {
-            console.error(error); 
+            console.error(error);
         }
     };
-
 
     useEffect(() => {
         getUser();
         setCommentsCount(post.comments?.length);
         setSelectedEmotion(
-            post.lovedBy.some((user) => user._id === user?._id) ? emotions[1] : null || 
-            post.likedBy.some((user) => user._id === user?._id) ? emotions[0] : null ||
-            post.surprisedBy.some((user) => user._id === user?._id) ? emotions[0] : null);
+            post.lovedBy.some((user) => user._id === user?._id) ? emotions[1] : null ||
+                post.likedBy.some((user) => user._id === user?._id) ? emotions[0] : null ||
+                    post.surprisedBy.some((user) => user._id === user?._id) ? emotions[0] : null);
+        setReactionCount(post.lovedBy.length + post.likedBy.length + post.surprisedBy.length);
     }, [post.comments?.length, post.likedBy]);
 
     const openImageViewer = (index) => {
@@ -78,8 +79,10 @@ const PostItem = ({ post }) => {
         // Nếu đã chọn cảm xúc, click thường sẽ reset về trạng thái chưa chọn
         if (selectedEmotion) {
             setSelectedEmotion(null); // Reset về trạng thái Like mặc định (đen)
+            setReactionCount(reactionCount - 1);
         } else {
             setSelectedEmotion(emotions[0]); // Nếu chưa chọn, thì chọn Like
+            setReactionCount(reactionCount + 1);
         }
     };
 
@@ -241,17 +244,20 @@ const PostItem = ({ post }) => {
                         className="w-12 h-12 rounded-full"
                     />
                     <View className="ml-3">
-                        <Text className="font-bold">{post.author.firstName} {post.author.lastName}</Text>
+
+                        <TouchableOpacity onPress={() => navigation.navigate('Profile', { searchUser: post.author })}>
+                            <Text className="font-bold">{post.author.firstName} {post.author.lastName}</Text>
+                        </TouchableOpacity>
                         <Text className="text-gray-500 text-xs">{formatTime(post.createdAt)}</Text>
                     </View>
                 </View>
 
                 {/* Badge */}
                 <View className="flex-row items-center">
-                    <Text className="text-xs text-white bg-yellow-400 px-2 py-1 rounded-full ml-1">
+                    {/* <Text className="text-xs text-white bg-yellow-400 px-2 py-1 rounded-full ml-1">
                         <FontAwesome name="check-circle" size={16} color="white" />
                         Bác sĩ
-                    </Text>
+                    </Text> */}
                 </View>
             </View>
 
@@ -262,12 +268,10 @@ const PostItem = ({ post }) => {
 
             {/* Categories */}
             <View className="flex-row mt-1">
-                <Text className="bg-red-500 text-white text-xs px-2 py-1 rounded-full mr-2">
-                    Cate 1
-                </Text>
-                <Text className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                    Cate 2
-                </Text>
+                {post.tags.map((tag) => (
+                    <Text key={tag._id} className="bg-green-500 text-xs color-white px-2 py-1 rounded-full mr-1">{tag.name}</Text>
+
+                ))}
             </View>
 
             {/* Images */}
@@ -283,10 +287,16 @@ const PostItem = ({ post }) => {
 
             <View className="flex-row mt-3 justify-between items-center">
                 {/* Emotion Button */}
-                <View>
+                <View className="flex-row items-center">
                     <Text>
-                        5 lượt thích
+                        {reactionCount}
+
                     </Text>
+                    <View className="flex-row ml-1">
+                        <FontAwesome name="thumbs-o-up" size={16} color="blue" />
+                        <FontAwesome name="heart" size={16} color="red" />
+                        <FontAwesome name="smile-o" size={16} color="yellow" />
+                    </View>
                 </View>
                 <View>
                     <Text>

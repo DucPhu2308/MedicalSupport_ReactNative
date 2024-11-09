@@ -8,8 +8,10 @@ import ProfileScreen from "../screens/ProfileScreen";
 import { Ionicons } from "@expo/vector-icons";
 import ChatDetailScreen from "../screens/ChatDetailScreen";
 import AppointmentScreen from "../screens/AppointmentScreen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import NotificationScreen from "../screens/NotificationScreen";
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "../redux/slices/notificationSlice";
 import { getUnreadCount } from "../redux/slices/chatSlice";
@@ -25,6 +27,29 @@ const NavigationBar = () => {
     dispatch(fetchNotifications());
     dispatch(getUnreadCount());
   }, []);
+
+
+  const [searchUser, setSearchUser] = useState({});
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    fetchsearchUser();
+  }, []);
+
+  const fetchsearchUser = async () => {
+    const user = await AsyncStorage.getItem("user");
+    if (user) {
+      setSearchUser(JSON.parse(user));
+    }
+  };
+
+  const handleClickTab = (routeName) => {
+    if (routeName === "Profile") {
+      navigation.navigate("Profile", { searchUser });
+    } else {
+      navigation.navigate(routeName);
+    }
+  }
 
   return (
     <>
@@ -47,7 +72,7 @@ const NavigationBar = () => {
             }
   
             // You can return any component that you like here!
-            return <Ionicons name={iconName} size={30} color={color} />;
+            return <Ionicons name={iconName} size={30} color={color} onPress={()=>handleClickTab(route.name)} />;
           },
           tabBarActiveTintColor: '#008DDA',
         })}
