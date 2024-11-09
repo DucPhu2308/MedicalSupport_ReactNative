@@ -6,6 +6,7 @@ import PostAPI from "../API/PostAPI";
 import { UserAPI } from "../API/UserAPI";
 import PostItem from "../components/PostItem";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { ChatAPI } from "../API/ChatAPI";
 
 const ProfileScreen = ({ route }) => {
     const [posts, setPosts] = useState([]);
@@ -80,6 +81,13 @@ const ProfileScreen = ({ route }) => {
         }
     };
 
+    const handlePrivateChat = async () => {
+        const response = await ChatAPI.getPrivateChat(user._id);
+        const chat = response.data;
+        const friend = chat.participants.find((participant) => participant._id !== currentUser._id);
+        navigation.navigate('ChatDetail', { chatId: chat._id, friend });
+    };
+
     const renderProfileHeader = () => (
         <View className="bg-bluelight">
             <View className="relative">
@@ -105,7 +113,10 @@ const ProfileScreen = ({ route }) => {
                         </TouchableOpacity>
                     ) : (
                         <>
-                            <TouchableOpacity className="flex-1 bg-blue-500 py-2 rounded-lg items-center">
+                            <TouchableOpacity 
+                                onPress={handlePrivateChat}
+                                className="flex-1 bg-blue-500 py-2 rounded-lg items-center"
+                            >
                                 <Text className="text-white font-semibold">+ Nhắn tin</Text>
                             </TouchableOpacity>
                             <TouchableOpacity

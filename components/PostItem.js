@@ -240,7 +240,7 @@ const PostItem = ({ post }) => {
                 {/* Avatar and user info */}
                 <View className="flex-row items-center">
                     <Image
-                        source={{ uri: 'https://via.placeholder.com/50' }} // Replace with avatar URL
+                        source={{ uri: post.author.avatar }} // Replace with avatar URL
                         className="w-12 h-12 rounded-full"
                     />
                     <View className="ml-3">
