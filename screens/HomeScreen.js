@@ -10,7 +10,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const LIMIT = 2;
+  const LIMIT = 5;
 
   const navigation = useNavigation();
 

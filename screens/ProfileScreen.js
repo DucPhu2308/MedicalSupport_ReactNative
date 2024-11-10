@@ -7,8 +7,10 @@ import { UserAPI } from "../API/UserAPI";
 import PostItem from "../components/PostItem";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { ChatAPI } from "../API/ChatAPI";
+import { useAuth } from "../contexts/AuthContext";
 
 const ProfileScreen = ({ route }) => {
+    const { logout } = useAuth();
     const [posts, setPosts] = useState([]);
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
@@ -166,13 +168,29 @@ const ProfileScreen = ({ route }) => {
         </View>
     );
 
+    const handleLogout = async () => {
+        await logout();
+        navigation.navigate('Login');
+    }
+
     return (
-        <FlatList
-            data={posts}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => <PostItem post={item} />}
-            ListHeaderComponent={renderProfileHeader}
-        />
+        <View>
+            <FlatList
+                data={posts}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => <PostItem post={item} />}
+                ListHeaderComponent={renderProfileHeader}
+            />
+            {currentUser._id === user._id && (
+                <TouchableOpacity
+                    className="fixed bottom-12 bg-red-500/90 self-center shadow-xl
+                        w-8/12 h-10 rounded-2xl items-center justify-center"
+                    onPress={handleLogout}
+                >
+                    <Text className="text-white">Đăng xuất</Text>
+                </TouchableOpacity>
+            )}
+        </View>
     );
 };
 
