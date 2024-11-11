@@ -6,8 +6,11 @@ import PostAPI from "../API/PostAPI";
 import { UserAPI } from "../API/UserAPI";
 import PostItem from "../components/PostItem";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { ChatAPI } from "../API/ChatAPI";
+import { useAuth } from "../contexts/AuthContext";
 
 const ProfileScreen = ({ route }) => {
+    const { logout } = useAuth();
     const [posts, setPosts] = useState([]);
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
@@ -80,6 +83,13 @@ const ProfileScreen = ({ route }) => {
         }
     };
 
+    const handlePrivateChat = async () => {
+        const response = await ChatAPI.getPrivateChat(user._id);
+        const chat = response.data;
+        const friend = chat.participants.find((participant) => participant._id !== currentUser._id);
+        navigation.navigate('ChatDetail', { chatId: chat._id, friend });
+    };
+
     const renderProfileHeader = () => (
         <View className="bg-bluelight">
             <View className="relative">
@@ -105,7 +115,10 @@ const ProfileScreen = ({ route }) => {
                         </TouchableOpacity>
                     ) : (
                         <>
-                            <TouchableOpacity className="flex-1 bg-blue-500 py-2 rounded-lg items-center">
+                            <TouchableOpacity 
+                                onPress={handlePrivateChat}
+                                className="flex-1 bg-blue-500 py-2 rounded-lg items-center"
+                            >
                                 <Text className="text-white font-semibold">+ Nhắn tin</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -155,13 +168,30 @@ const ProfileScreen = ({ route }) => {
         </View>
     );
 
+    const handleLogout = async () => {
+        await logout();
+        navigation.navigate('Login');
+    }
+
     return (
-        <FlatList
+        
+        <View>
+            <FlatList
             data={posts}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => <PostItem post={item} onDelete={() => fetchPosts(searchUser._id)} />}
             ListHeaderComponent={renderProfileHeader}
         />
+            {currentUser._id === user._id && (
+                <TouchableOpacity
+                    className="fixed bottom-12 bg-red-500/90 self-center shadow-xl
+                        w-8/12 h-10 rounded-2xl items-center justify-center"
+                    onPress={handleLogout}
+                >
+                    <Text className="text-white">Đăng xuất</Text>
+                </TouchableOpacity>
+            )}
+        </View>
     );
 };
 

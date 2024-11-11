@@ -59,33 +59,29 @@ const AppointmentScreen = ({ navigation }) => {
   const fetchAppointments = useCallback(async () => {
     try {
       setLoading(true);
-      setUserId(await getUserId());
+      const id = await getUserId();
+      setUserId(id);
 
       const response = await AppointmentAPI.getAppointmentBySenderId();
-      const currentDate = new Date();
-
-      const upcomingAppointments = response.data
+      const allAppointments = response.data
         .filter(
           (appointment) =>
-            new Date(appointment.date) > currentDate &&
-            (appointment.sender._id == userId ||
-              appointment.recipient._id == userId)
+            appointment.sender._id == id || appointment.recipient._id == id
         )
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-      setAppointments(upcomingAppointments);
+      setAppointments(allAppointments);
 
-      if (upcomingAppointments.length > 0) {
-        const firstAppointmentDate = new Date(upcomingAppointments[0].date);
-        setSelectedMonth((firstAppointmentDate.getMonth() + 1).toString());
-        setSelectedYear(firstAppointmentDate.getFullYear().toString());
-      }
+      // Đặt giá trị mặc định cho tháng và năm theo thời gian hiện tại
+      const currentDate = new Date();
+      setSelectedMonth((currentDate.getMonth() + 1).toString());
+      setSelectedYear(currentDate.getFullYear().toString());
     } catch (error) {
       console.error("Failed to fetch appointments:", error);
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     fetchAppointments();
@@ -189,7 +185,7 @@ const AppointmentScreen = ({ navigation }) => {
       </View>
       {loading ? (
         <Text>Loading...</Text>
-      ) : (
+      ) : filteredAppointments.length > 0 ? (
         <FlatList
           data={filteredAppointments}
           renderItem={renderAppointment}
@@ -198,6 +194,10 @@ const AppointmentScreen = ({ navigation }) => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
+      ) : (
+        <Text style={styles.noteText}>
+          Bạn không có cuộc hẹn nào trong thời gian này
+        </Text>
       )}
     </View>
   );
@@ -275,6 +275,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "blue",
     alignSelf: "flex-end",
+  },
+  noteText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
