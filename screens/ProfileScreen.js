@@ -159,7 +159,7 @@ const ProfileScreen = ({ route }) => {
         <FlatList
             data={posts}
             keyExtractor={(item) => item._id}
-            renderItem={({ item }) => <PostItem post={item} />}
+            renderItem={({ item }) => <PostItem post={item} onDelete={() => fetchPosts(searchUser._id)} />}
             ListHeaderComponent={renderProfileHeader}
         />
     );

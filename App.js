@@ -20,6 +20,9 @@ import { Provider } from "react-redux";
 import store from "./redux/store";
 import SocketEventListener from "./components/SocketEventListener";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import ProfileScreen from "./screens/ProfileScreen";
+import PostDetailScreen from "./screens/PostDetailScreen";
+import PublishPostScreen from "./screens/PublishPostScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -30,7 +33,7 @@ export default function App() {
         <SocketProvider>
           <SafeAreaProvider>
             <NavigationContainer>
-              <Stack.Navigator initialRouteName="Intro">
+              <Stack.Navigator initialRouteName="Login">
                 <Stack.Screen
                   name="Intro"
                   component={IntroScreen}
@@ -85,6 +88,7 @@ export default function App() {
                   component={CreatePostScreen}
                   options={{ headerShown: false }}
                 />
+                <Stack.Screen name="PostDetail" component={PostDetailScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="PostComment" component={PostComment} options={{ headerShown: false }} />
                 <Stack.Screen name="ListUserFollow" component={ListUserFollowScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="UpdateProfile" component={UpdateProfileScreen} options={{ headerShown: false }} />

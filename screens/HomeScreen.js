@@ -39,6 +39,9 @@ const HomeScreen = () => {
     }
   }
 
+  
+
+
   return (
     <View>
       {/* <Text style={styles.text}>Trang chủ</Text>
@@ -47,7 +50,7 @@ const HomeScreen = () => {
         onEndReached={handleLoadMore}
         data={posts}
         keyExtractor={item => item._id}
-        renderItem={({ item }) => <PostItem post={item} />}
+        renderItem={({ item }) => <PostItem post={item}  />}
         ListFooterComponent={
           loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
         }

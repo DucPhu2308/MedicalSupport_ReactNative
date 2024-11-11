@@ -6,7 +6,6 @@ import SearchScreen from "../screens/SearchScreen";
 import PostDetailScreen from "../screens/PostDetailScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import { Ionicons } from "@expo/vector-icons";
-import ChatDetailScreen from "../screens/ChatDetailScreen";
 import AppointmentScreen from "../screens/AppointmentScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
@@ -14,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import NotificationScreen from "../screens/NotificationScreen";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "../redux/slices/notificationSlice";
+import PublishPostScreen from "../screens/PublishPostScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -21,22 +21,24 @@ const NavigationBar = () => {
   const dispatch = useDispatch();
   const unreadCount = useSelector((state) => state.notification.unreadCount);
 
-  useEffect(() => {
-    dispatch(fetchNotifications());
-  }, []);
-
-
   const [searchUser, setSearchUser] = useState({});
+  const [isDoctor, setIsDoctor] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchsearchUser();
+    dispatch(fetchNotifications());
+  }, [dispatch]);
+
+  useEffect(() => {
+    fetchUserData();
   }, []);
 
-  const fetchsearchUser = async () => {
+  const fetchUserData = async () => {
     const user = await AsyncStorage.getItem("user");
     if (user) {
-      setSearchUser(JSON.parse(user));
+      const parsedUser = JSON.parse(user);
+      setSearchUser(parsedUser);
+      setIsDoctor(parsedUser.roles.includes("DOCTOR")); 
     }
   };
 
@@ -55,7 +57,7 @@ const NavigationBar = () => {
           header: () => <Header />,
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
-  
+
             if (route.name === "Home") {
               iconName = focused ? "home" : "home-outline";
             } else if (route.name === "Chat") {
@@ -66,10 +68,11 @@ const NavigationBar = () => {
               iconName = focused ? "calendar" : "calendar-outline";
             } else if (route.name === "Notification") {
               iconName = focused ? "notifications" : "notifications-outline";
+            } else if (route.name === "PermissionPost") {
+              iconName = focused ? "search" : "search";
             }
-  
-            // You can return any component that you like here!
-            return <Ionicons name={iconName} size={30} color={color} onPress={()=>handleClickTab(route.name)} />;
+
+            return <Ionicons name={iconName} size={30} color={color} onPress={() => handleClickTab(route.name)} />;
           },
           tabBarActiveTintColor: '#008DDA',
         })}
@@ -78,28 +81,24 @@ const NavigationBar = () => {
         <Tab.Screen name="Chat" component={ChatScreen} />
         <Tab.Screen name="Appointment" component={AppointmentScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
-        <Tab.Screen name="Notification" component={NotificationScreen} 
+        <Tab.Screen name="Notification" component={NotificationScreen}
           options={{
             tabBarBadge: unreadCount > 0 ? unreadCount : null,
-          }}  
+          }}
         />
-  
-        {/* Hide SearchScreen from the tab bar */}
+        {isDoctor && (
+          <Tab.Screen name="PermissionPost" component={PublishPostScreen} />
+        )}
+
+        {/* Hide SearchScreen and PostDetailScreen from the tab bar */}
         <Tab.Screen name="Search" component={SearchScreen} options={{
           tabBarButton: () => null,
-          tabBarVisible: false,
           headerShown: false
         }} />
         <Tab.Screen name="PostDetail" component={PostDetailScreen} options={{
           tabBarButton: () => null,
-          tabBarVisible: false,
           headerShown: false
         }} />
-        {/* <Tab.Screen name="ChatDetail" component={ChatDetailScreen} options={{
-                  tabBarButton: () => null,
-                  tabBarVisible: false,
-                  headerShown: false
-              }} /> */}
       </Tab.Navigator>
     </>
   );

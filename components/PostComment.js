@@ -160,7 +160,7 @@ const PostComment = () => {
       <View key={reply._id} className="pl-6 mt-2">
         <View className="flex-row items-start">
           <Image
-            source={{ uri: 'https://via.placeholder.com/50' }}
+            source={{ uri: reply.author.avatar }}
             className="w-8 h-8 rounded-full"
           />
           <View className="ml-2 flex-1">
@@ -203,7 +203,7 @@ const PostComment = () => {
           <View key={comment._id} className="p-4">
             <View className="flex-row items-start">
               <Image
-                source={{ uri: 'https://via.placeholder.com/50' }}
+                source={{ uri: comment.author.avatar }}
                 className="w-10 h-10 rounded-full"
               />
               <View className="ml-2 flex-1">
@@ -255,7 +255,7 @@ const PostComment = () => {
         )}
         <View className="flex-row items-center">
           <Image
-            source={{ uri: 'https://via.placeholder.com/50' }}
+            source={{ uri: user?.avatar }}
             className="w-10 h-10 rounded-full"
           />
           <TextInput
