@@ -15,9 +15,12 @@ import { EncodingType, readAsStringAsync } from 'expo-file-system';
 import ApptDialog from '../components/ApptDialog';
 import { useSocket } from '../contexts/SocketProvider';
 import { useAuth } from '../contexts/AuthContext';
+import { useDispatch } from 'react-redux';
+import { markChatAsRead } from '../redux/slices/chatSlice';
 
 const ChatDetailScreen = ({ navigation, route }) => {
     const socket = useSocket();
+    const dispatch = useDispatch();
     const { user } = useAuth();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
@@ -46,14 +49,9 @@ const ChatDetailScreen = ({ navigation, route }) => {
         setLoading(false);
     };
 
-    // useEffect(() => {
-    //     connectSocket().then((socket) => {
-    //         setSocket(socket);
-    //     });
-    //     AsyncStorage.getItem('user').then((data) => {
-    //         setUser(JSON.parse(data));
-    //     });
-    // }, []);
+    useEffect(() => {
+        dispatch(markChatAsRead(chatId));
+    }, [dispatch]);
 
     useEffect(() => {
         getMessages();

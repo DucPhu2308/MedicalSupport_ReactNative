@@ -1,16 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import PostAPI from '../API/PostAPI';
 import PostItem from '../components/PostItem';
-
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const LIMIT = 2;
+  const LIMIT = 5;
+
+  const navigation = useNavigation();
 
   const getPosts = async () => {
     setLoading(true);
@@ -26,8 +28,8 @@ const HomeScreen = () => {
     setLoading(false);
   };
 
+  
   useEffect(() => {
-    
     getPosts();
   }, [page]);
 

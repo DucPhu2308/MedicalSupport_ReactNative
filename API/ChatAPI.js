@@ -23,6 +23,14 @@ export class ChatAPI {
     static async getChats() {
         return axiosPrivate.get('/chat');
     }
+
+    static async markChatAsRead(chatId) {
+        return axiosPrivate.put(`/chat/${chatId}/mark-as-read`);
+    }
+
+    static async getUnreadCount() {
+        return axiosPrivate.get('/chat/count/unread');
+    }
 }
 
 export const AppointmentStatus = {

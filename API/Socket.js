@@ -5,7 +5,7 @@ let socket;
 
 const initSocket = async () => {
     const token = await AsyncStorage.getItem('token');
-    return io('http://192.168.100.111:4000', {
+    return io('http://192.168.56.1:4000', {
         extraHeaders: {
             token: `${token}`
         }
