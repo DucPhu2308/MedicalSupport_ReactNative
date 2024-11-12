@@ -11,6 +11,7 @@ import PostItem from "../components/PostItem";
 import UserInfoCard from "../components/UserInfoCard";
 import PostAPI from "../API/PostAPI";
 import UserAPI from "../API/UserAPI";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SearchScreen = ({ navigation }) => {
   const [search, setSearch] = useState("");
@@ -106,8 +107,8 @@ const SearchScreen = ({ navigation }) => {
   };
 
   return (
-    <>
-      <View className="flex-row justify-between items-center p-2 pt-7 bg-blue-500">
+    <SafeAreaView>
+      <View className="flex-row justify-between items-center p-2 bg-blue-500">
         <TouchableOpacity onPress={() => navigation.goBack()} className="mx-2">
           <FontAwesome name="arrow-left" size={30} color="#fff" />
         </TouchableOpacity>
@@ -157,7 +158,7 @@ const SearchScreen = ({ navigation }) => {
           />
         </View>
       ) : null}
-    </>
+    </SafeAreaView>
   );
 };
 
