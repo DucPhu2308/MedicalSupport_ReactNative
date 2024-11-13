@@ -12,6 +12,7 @@ import UserInfoCard from "../components/UserInfoCard";
 import PostAPI from "../API/PostAPI";
 import UserAPI from "../API/UserAPI";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../contexts/AuthContext";
 
 const SearchScreen = ({ navigation }) => {
   const [search, setSearch] = useState("");
@@ -35,8 +36,6 @@ const SearchScreen = ({ navigation }) => {
         }));
         setAllPosts(postsWithType);
         setAllUsers(usersWithType);
-        // console.log("response: ", response);
-        // console.log("responseUser: ", responseUser);
       } catch (error) {
         console.error("Failed to fetch posts:", error);
       }
@@ -81,16 +80,37 @@ const SearchScreen = ({ navigation }) => {
     }
   }, [search, tab, allPosts, allUsers]);
 
+  const followUser = async (userId) => {
+    try {
+      await UserAPI.followUser(userId);
+      // Update the isFollowing property of the user
+      const updatedUsers = allUsers.map((user) => {
+        if (user._id === userId) {
+          console.log("user", user);
+          return { ...user, isFollowing: !user.isFollowing };
+        }
+        return user;
+      });
+      setAllUsers(updatedUsers);
+    } catch (error) {
+      console.error("Failed to follow user:", error);
+    }
+  };
+
   const renderItem = ({ item }) => {
+    const isDoctor = item.roles && item.roles.includes("DOCTOR");
     if (item.type === "user") {
       return (
         <UserInfoCard
           user={{
+            _id: item._id,
             name: `${item.firstName} ${item.lastName}`,
             bio: item.email,
             avatar: item.avatar || "https://via.placeholder.com/150",
-            role: item.roles[0],
+            isDoctor,
+            isFollowing: item.isFollowing,
           }}
+          followUser={followUser}
         />
       );
     }

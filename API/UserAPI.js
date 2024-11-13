@@ -2,7 +2,7 @@ import axiosClient, { axiosPrivate } from "./AxiosClient";
 
 export class UserAPI {
   static async getAllUser() {
-    return axiosClient.get(`/user/all`);
+    return axiosPrivate.get(`/user/search`);
   }
 
   static async findUserByEmail(email) {
