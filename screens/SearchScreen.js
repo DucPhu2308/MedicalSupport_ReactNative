@@ -35,6 +35,8 @@ const SearchScreen = ({ navigation }) => {
         }));
         setAllPosts(postsWithType);
         setAllUsers(usersWithType);
+        // console.log("response: ", response);
+        // console.log("responseUser: ", responseUser);
       } catch (error) {
         console.error("Failed to fetch posts:", error);
       }
@@ -107,7 +109,7 @@ const SearchScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
       <View className="flex-row justify-between items-center p-2 bg-blue-500">
         <TouchableOpacity onPress={() => navigation.goBack()} className="mx-2">
           <FontAwesome name="arrow-left" size={30} color="#fff" />
