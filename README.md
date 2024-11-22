@@ -19,7 +19,11 @@ The main purpose of building a website to support patients and doctors is to cre
 
 ### Prerequisites
 
-Before you begin, make sure you have a backend server [like this](https://github.com/DucPhu2308/medical-support_nest-js) running.
+Before you begin, make sure you have the following tools and software installed on your system:
+
+- Node.js: Version >= 16.x
+Download and install it from the Node.js Official Website.
+- A backend server [like this](https://github.com/DucPhu2308/medical-support_nest-js) running.
 
 ### Installation
 
