@@ -15,7 +15,7 @@ export const useSocket = () => {
 export const SocketProvider = ({ children }) => {
     const { token } = useAuth();
 
-    const socket = useMemo(() => io("http://192.168.2.14:4000", {
+    const socket = useMemo(() => io(`${process.env.EXPO_PUBLIC_API_URL}`, {
         extraHeaders: {
             token: token
         }

@@ -37,7 +37,6 @@ const SocketEventListener = () => {
         };
 
         const handleNewMessage = (message) => {
-            console.log(message);
             setShowSnackbar(true);
             if (message.type === MessageType.TEXT) {
                 setNotification(`Bạn có tin nhắn mới từ ${message.sender.lastName}`);

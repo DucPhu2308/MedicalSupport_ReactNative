@@ -62,11 +62,18 @@ function ChatScreen({ navigation }) {
     }
   }, [debounceSearch]);
 
-  onRefresh = async () => {
+  const onRefresh = async () => {
     setRefreshing(true);
     await getChats();
     setRefreshing(false);
   };
+
+  const handlePrivateChat = async (userId) => {
+    const response = await ChatAPI.getPrivateChat(userId);
+    const chat = response.data;
+    const friend = chat.participants.find((participant) => participant._id !== user._id);
+    navigation.navigate('ChatDetail', { chatId: chat._id, friend });
+};
 
   return (
     <View className="flex-1 bg-[#f8f1e9] p-4">
@@ -87,7 +94,9 @@ function ChatScreen({ navigation }) {
             renderItem={({ item }) => {
               return <ChatItem avatarUrl={item.avatar}
                 username={`${item.firstName} ${item.lastName}`}
-                lastMessage={null} />;
+                lastMessage={null} 
+                onPress={() => handlePrivateChat(item._id)}
+              />;
             }}
           />
         ) : (
@@ -107,7 +116,7 @@ function ChatScreen({ navigation }) {
               username={`${friend.firstName} ${friend.lastName}`}
               lastMessage={item.lastMessage} />;
           }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { }} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
       )
       }

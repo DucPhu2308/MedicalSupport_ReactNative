@@ -1,47 +1,187 @@
 import { FontAwesome } from "@expo/vector-icons";
-import { useState } from "react";
-import { View, Text, TouchableOpacity, TextInput, FlatList } from "react-native";
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+} from "react-native";
 import PostItem from "../components/PostItem";
+import UserInfoCard from "../components/UserInfoCard";
 import PostAPI from "../API/PostAPI";
+import UserAPI from "../API/UserAPI";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../contexts/AuthContext";
 
 const SearchScreen = ({ navigation }) => {
-    const [search, setSearch] = useState('');
-    const [posts, setPosts] = useState([]);
+  const [search, setSearch] = useState("");
+  const [tab, setTab] = useState("all");
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
-    const handleSearch = async () => {
-        const response = await PostAPI.searchPost(search);
-        console.log("search post", response.data);
-        setPosts(response.data);
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await PostAPI.getAllPost();
+        const responseUser = await UserAPI.getAllUser();
+        const postsWithType = response.data.map((post) => ({
+          ...post,
+          type: "post",
+        }));
+        const usersWithType = responseUser.data.map((user) => ({
+          ...user,
+          type: "user",
+        }));
+        setAllPosts(postsWithType);
+        setAllUsers(usersWithType);
+      } catch (error) {
+        console.error("Failed to fetch posts:", error);
+      }
     };
-    return (
-        <>
-            <View className="flex-row justify-between items-center p-2 pt-7 bg-blue-500">
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    className="mx-2">
-                    <FontAwesome name="arrow-left" size={30} color="#fff" />
-                </TouchableOpacity>
-                <TextInput
-                    value={search}
-                    onChangeText={setSearch}
-                    onSubmitEditing={handleSearch}
-                    className="p-1 text-white rounded-lg w-60 flex-grow bg-blue-400" placeholder="Tìm kiếm..." />
-            </View>
-            {
-                posts.length > 0 ? (
-                    <FlatList
-                        data={posts}
-                        keyExtractor={item => item._id}
-                        renderItem={({ item }) => <PostItem post={item} />}
-                    />
-                ) :
-                    (<View className="flex-1 justify-center items-center">
-                        <Text className="text-lg">Tìm kiếm bài viết...</Text>
-                    </View>)
-            }
 
-        </>
+    fetchPosts();
+  }, []);
+
+  const removeAccents = (str) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  };
+
+  useEffect(() => {
+    if (search) {
+      const normalizedSearch = removeAccents(search);
+
+      const filteredPosts = allPosts.filter((post) => {
+        const fullName = `${post.author.firstName} ${post.author.lastName}`;
+        return (
+          removeAccents(post.title).includes(normalizedSearch) ||
+          removeAccents(fullName).includes(normalizedSearch)
+        );
+      });
+
+      const filteredUsers = allUsers.filter((user) =>
+        removeAccents(`${user.firstName} ${user.lastName}`).includes(
+          normalizedSearch
+        )
+      );
+
+      const combinedItems = [
+        ...(tab !== "posts" ? filteredUsers : []),
+        ...(tab !== "people" ? filteredPosts : []),
+      ];
+
+      setFilteredItems(combinedItems);
+    } else {
+      setFilteredItems([]);
+    }
+  }, [search, tab, allPosts, allUsers]);
+
+  const followUser = async (userId) => {
+    try {
+      await UserAPI.followUser(userId);
+      // Update the isFollowing property of the user
+      const updatedUsers = allUsers.map((user) => {
+        if (user._id === userId) {
+          console.log("user", user);
+          return { ...user, isFollowing: !user.isFollowing };
+        }
+        return user;
+      });
+      setAllUsers(updatedUsers);
+    } catch (error) {
+      console.error("Failed to follow user:", error);
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    const isDoctor = item.roles && item.roles.includes("DOCTOR");
+    if (item.type === "user") {
+      return (
+        <UserInfoCard
+          user={{
+            _id: item._id,
+            name: `${item.firstName} ${item.lastName}`,
+            bio: item.email,
+            avatar: item.avatar || "https://via.placeholder.com/150",
+            isDoctor,
+            isFollowing: item.isFollowing,
+          }}
+          followUser={followUser}
+        />
+      );
+    }
+    return (
+      <>
+        <PostItem post={item} />
+        <View
+          style={{
+            height: 1,
+            backgroundColor: "#ccc",
+            marginVertical: 8,
+          }}
+        />
+      </>
     );
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View className="flex-row justify-between items-center p-2 bg-blue-500">
+        <TouchableOpacity onPress={() => navigation.goBack()} className="mx-2">
+          <FontAwesome name="arrow-left" size={30} color="#fff" />
+        </TouchableOpacity>
+        <TextInput
+          value={search}
+          onChangeText={setSearch}
+          className="p-1 text-white rounded-lg w-60 flex-grow bg-blue-400"
+          placeholder="Tìm kiếm..."
+        />
+      </View>
+
+      {search ? (
+        <View className="flex-row justify-around p-2 bg-gray-100">
+          <TouchableOpacity
+            onPress={() => setTab("all")}
+            className={`px-4 py-2 rounded-full ${
+              tab === "all" ? "bg-pink-300" : "bg-gray-200"
+            }`}
+          >
+            <Text>Tất cả</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setTab("people")}
+            className={`px-4 py-2 rounded-full ${
+              tab === "people" ? "bg-yellow-300" : "bg-gray-200"
+            }`}
+          >
+            <Text>Mọi người</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setTab("posts")}
+            className={`px-4 py-2 rounded-full ${
+              tab === "posts" ? "bg-blue-300" : "bg-gray-200"
+            }`}
+          >
+            <Text>Bài viết</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {search ? (
+        <View className="flex-1">
+          <FlatList
+            data={filteredItems}
+            keyExtractor={(item) => item._id || item.name}
+            renderItem={renderItem}
+          />
+        </View>
+      ) : null}
+    </SafeAreaView>
+  );
 };
 
 export default SearchScreen;

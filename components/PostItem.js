@@ -53,7 +53,7 @@ const PostItem = ({ post, onDelete }) => {
     };
 
     useEffect(() => {
-        if (route.name === 'Home' || route.name === 'Profile') {
+        if (route.name === 'Home' || route.name === 'Profile' || route.name === 'Search') {
             setIsPostDetail(true);
         } else {
             setIsPostDetail(false);

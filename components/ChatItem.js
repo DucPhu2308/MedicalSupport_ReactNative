@@ -5,7 +5,7 @@ import { MessageType } from '../API/ChatAPI';
 import { formatMessageTime } from '../utils/DatetimeUtils';
 import { TouchableOpacity } from 'react-native';
 
-const ChatItem = ({ avatarUrl, username, lastMessage, onPress, isRead }) => {
+const ChatItem = ({ avatarUrl, username, lastMessage, onPress, isRead = true }) => {
   return (
     <TouchableOpacity onPress={onPress} 
       className={`flex-row items-center p-3 border-b border-gray-300 rounded-xl
