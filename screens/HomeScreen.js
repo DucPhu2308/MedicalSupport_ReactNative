@@ -19,8 +19,9 @@ const HomeScreen = () => {
     try {
       const response = await PostAPI.getPostPagination(page, LIMIT);
       const filteredData = response.data.filter(item => item.status === 'PUBLISHED');
+      const sortedData = filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       
-      setPosts([...posts, ...filteredData]);
+      setPosts([...posts, ...sortedData]);
       if (response.data.length < LIMIT) {
         setHasMore(false);
       }

@@ -32,7 +32,8 @@ const ProfileScreen = ({ route }) => {
     const fetchPosts = async (id) => {
         try {
             const res = await PostAPI.getPostByUserId(id);
-            setPosts(res.data);
+            const sortedPosts = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            setPosts(sortedPosts);
         } catch (error) {
             console.error(error);
         }
