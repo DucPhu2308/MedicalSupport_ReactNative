@@ -8,8 +8,8 @@ import ProfileScreen from "../screens/ProfileScreen";
 import { Ionicons } from "@expo/vector-icons";
 import AppointmentScreen from "../screens/AppointmentScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import NotificationScreen from "../screens/NotificationScreen";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "../redux/slices/notificationSlice";
@@ -37,10 +37,11 @@ const NavigationBar = () => {
     dispatch(fetchNotifications());
   }, [dispatch]);
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, [])
+  );
   const fetchUserData = async () => {
     const user = await AsyncStorage.getItem("user");
     if (user) {

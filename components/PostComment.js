@@ -121,7 +121,7 @@ const PostComment = () => {
           setNewComment('');
           setReplyingTo(null);
           setReplyingToUsername(null);
-          setSelectedImage(null); 
+          setSelectedImage(null);
 
         })
         .catch((error) => {
@@ -194,11 +194,18 @@ const PostComment = () => {
         <Text className="text-gray-900 font-bold">
           <FontAwesome name="thumbs-o-up" size={24} color="gray" />
           <FontAwesome name="heart" size={24} color="red" />
+          <FontAwesome name="surprise" size={24} color="yellow" />
           {loveCount + likeCount + surpriseCount}
         </Text>
       </View>
 
       <ScrollView className="flex-1">
+        {commentsData.length === 0 && (
+          <View className="p-4">
+            <Text className="text-gray-500">Chưa có bình luận nào</Text>
+          </View>
+        )}
+
         {commentsData.map((comment) => (
           <View key={comment._id} className="p-4">
             <View className="flex-row items-start">

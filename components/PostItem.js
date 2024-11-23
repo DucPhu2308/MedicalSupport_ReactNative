@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, TextInput, FlatList } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput, FlatList, Modal } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import ImageViewing from 'react-native-image-viewing';
@@ -11,7 +11,8 @@ import PostComment from './PostComment';
 import { set } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { is, tr } from 'date-fns/locale';
+import { is, se, tr } from 'date-fns/locale';
+import { DepartmentAPI } from '../API/DepartmentAPI';
 // Kích hoạt plugin relativeTime
 dayjs.extend(relativeTime);
 
@@ -38,7 +39,9 @@ const PostItem = ({ post, onDelete }) => {
     const [isOwnProfile, setIsOwnProfile] = useState(false);
     const [isPostDetail, setIsPostDetail] = useState(false);
     const [isPublished, setIsPublished] = useState(false);
-
+    const [isModalVisible, setModalVisible] = useState(false); // Control modal visibility
+    const [reasonRejected, setReasonRejected] = useState(''); // Reason for rejection
+    const [listDepartment, setListDepartment] = useState([]);
     const getUser = async () => {
         try {
             const user = await AsyncStorage.getItem('user');
@@ -63,6 +66,18 @@ const PostItem = ({ post, onDelete }) => {
         }
     }, [route.name]);
 
+    useEffect(() => {
+        fetchListDepartment();
+    }, []);
+
+    const fetchListDepartment = async () => {
+        try {
+            const response = await DepartmentAPI.getAll();
+            setListDepartment(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
     useEffect(() => {
         getUser();
         setCommentsCount(post.comments?.length);
@@ -263,169 +278,243 @@ const PostItem = ({ post, onDelete }) => {
     }
 
     const handlePublishPost = (postId, status) => {
-        PostAPI.updatePost(postId, { status })
+        const data = {
+            status: status,
+            reasonRejected: reasonRejected
+        };
+        PostAPI.updatePost(postId, data)
             .then((response) => {
                 onDelete(postId);
+                setModalVisible(false);
+                setReasonRejected('');
             })
             .catch((error) => {
                 console.error(error);
             });
+
     }
-        
+
+
+
+    const handleOpenRejectionModal = () => {
+        setModalVisible(true);
+    };
+
+    const handleCloseRejectionModal = () => {
+        setModalVisible(false);
+    };
+
+    const renderRejectionModal = () => (
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isModalVisible}
+            onRequestClose={handleCloseRejectionModal}
+        >
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '90%' }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'red', marginBottom: 10 }}>Lý do từ chối</Text>
+                    <TextInput
+                        multiline
+                        numberOfLines={4}
+                        placeholder="Nhập lý do từ chối"
+                        style={{
+                            borderWidth: 1,
+                            borderColor: 'red',
+                            borderRadius: 4,
+                            padding: 8,
+                            marginBottom: 16,
+                            textAlignVertical: 'top',
+                        }}
+                        value={reasonRejected}
+                        onChangeText={(text) => setReasonRejected(text)}
+                    />
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <TouchableOpacity
+                            style={{ backgroundColor: 'red', padding: 10, borderRadius: 5 }}
+                            onPress={() => handlePublishPost(post._id, "REJECTED")}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Gửi</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ backgroundColor: 'gray', padding: 10, borderRadius: 5 }}
+                            onPress={handleCloseRejectionModal}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Hủy</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
+
 
     return (
-        <View className="bg-orange-100 p-4 rounded-lg m-1">
-            {/* Header */}
+        <>
+            {isModalVisible && renderRejectionModal()}
 
-            <View className="flex-row justify-between items-center">
-                {/* Avatar and user info */}
-                <View className="flex-row items-center justify-between w-full">
-                    <View className="flex-row items-center">
-                        <Image
-                            source={{ uri: post.author.avatar }}
-                            className="w-12 h-12 rounded-full"
-                        />
-                        <View className="ml-3">
-                            <TouchableOpacity onPress={() => navigation.navigate('Profile', { searchUser: post.author })}>
-                                <Text className="font-bold">{post.author.firstName} {post.author.lastName}</Text>
-                            </TouchableOpacity>
-                            <Text className="text-gray-500 text-xs">{formatTime(post.createdAt)}</Text>
-                        </View>
-                    </View>
+            <View className="bg-orange-100 p-4 rounded-lg m-1">
+                {/* Header */}
 
-                    {isOwnProfile && (
+                <View className="flex-row justify-between items-center">
+                    {/* Avatar and user info */}
+                    <View className="flex-row items-center justify-between w-full">
                         <View className="flex-row items-center">
-                            <TouchableOpacity onPress={() => handleDeletePost(post._id)}>
-                                <FontAwesome name="trash" size={24} color="red" />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
+                            <Image
+                                source={{ uri: post.author.avatar }}
+                                className="w-12 h-12 rounded-full"
+                            />
+                            <View className="ml-3">
+                                <TouchableOpacity onPress={() => navigation.navigate('Profile', { searchUser: post.author })}>
+                                    <Text className="font-bold">{post.author.firstName} {post.author.lastName}</Text>
+                                </TouchableOpacity>
+                                <Text className="text-gray-500 text-xs">{formatTime(post.createdAt)}</Text>
+                            </View>
 
-                {/* Badge */}
-                <View className="flex-row items-center">
-                    {/* <Text className="text-xs text-white bg-yellow-400 px-2 py-1 rounded-full ml-1">
-                        <FontAwesome name="check-circle" size={16} color="white" />
-                        Bác sĩ
-                    </Text> */}
-                </View>
-            </View>
-
-            {/* Title */}
-            {isPostDetail === true ? (
-                <Text className="font-bold text-lg mt-2">{post.title}
-                    <Text className="text-gray-500 text-sm font-normal" onTouchEnd={() => navigation.navigate('PostDetail', { post })}> - Xem chi tiết</Text>
-                </Text>) : (
-                <Text className="font-bold text-lg mt-2">{post.title}</Text>
-            )}
-
-            {/* Categories */}
-            <View className="flex-row mt-1">
-                {post.tags.map((tag) => (
-                    <Text key={tag._id} className="bg-green-500 text-xs color-white px-2 py-1 rounded-full mr-1">{tag.name}</Text>
-
-                ))}
-            </View>
-
-            {/* Images */}
-            {post.images.length > 0 && renderImages(post.images)}
-
-            {/* Image Modal */}
-            <ImageViewing
-                images={post.images.map((image) => ({ uri: image }))}
-                imageIndex={selectedImageIndex}
-                visible={visible}
-                onRequestClose={() => setVisible(false)}
-            />
-
-            {isPublished === false ? (
-                <>
-                    <View className="flex-row mt-3 justify-between items-center">
-                        {/* Emotion Button */}
-                        <View className="flex-row items-center">
-                            <Text>
-                                {reactionCount}
-
-                            </Text>
-                            <View className="flex-row ml-1">
-                                <FontAwesome name="thumbs-o-up" size={16} color="blue" />
-                                <FontAwesome name="heart" size={16} color="red" />
-                                <FontAwesome name="smile-o" size={16} color="yellow" />
+                            <View className="flex-row items-center ml-3">
+                                {user?.roles.includes('DOCTOR') && (
+                                    <Text className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                                        Bác sĩ
+                                    </Text>
+                                )}
                             </View>
                         </View>
-                        <View>
-                            <Text>
-                                {commentsCount} bình luận
-                            </Text>
-                        </View>
-                    </View>
-                    {/* Emotion List */}
-                    {showEmotions && (
-                        <View style={{ flexDirection: 'row', marginTop: 4 }}>
-                            {emotions.map((emotion) => (
-                                <TouchableOpacity
-                                    key={emotion.id}
-                                    onPress={() => handleEmotionSelect(emotion)}
-                                    style={{ marginHorizontal: 4 }}
-                                >
-                                    <FontAwesome name={emotion.icon} size={28} color={emotion.color} />
+
+                        {isOwnProfile && (
+                            <View className="flex-row items-center">
+                                <TouchableOpacity onPress={() => handleDeletePost(post._id)}>
+                                    <FontAwesome name="trash" size={24} color="red" />
                                 </TouchableOpacity>
-                            ))}
-                        </View>
-                    )}
-                    {/* Footer */}
-                    <View className="flex-row mt-3 justify-between items-center">
-                        {/* Emotion Button */}
-                        <View>
-                            <TouchableOpacity
-                                className="flex-row items-center"
-                                onPress={handleLike} // Xử lý nhấn ngắn
-                                onLongPress={handleLongPress} // Xử lý giữ lâu
-                            >
-                                {selectedEmotion ? (
-                                    <FontAwesome name={selectedEmotion.icon} size={24} color={selectedEmotion.color} />
-                                ) : (
-                                    <FontAwesome name={'thumbs-o-up'} size={24} color={'gray'} />
-                                )}
-                                <Text className="ml-2 text-gray-700">
-                                    {selectedEmotion ? selectedEmotion.name : 'Like'}
-                                </Text>
-                            </TouchableOpacity>
-
-
-                        </View>
-
-                        {/* Comment Button */}
-                        {/* Toggle comments section */}
-                        <View className="flex-row mt-3 justify-between items-center">
-                            <TouchableOpacity className="flex-row items-center" onPress={handleCommentPress}>
-                                <FontAwesome name="comment-o" size={24} color="gray" />
-                                <Text className="ml-2 text-gray-700">Bình luận</Text>
-                            </TouchableOpacity>
-                        </View>
-
-
+                            </View>
+                        )}
                     </View>
-                </>
-            ) : (
-                <View className="flex-row mt-3 justify-between items-center">
-                    <TouchableOpacity
-                        className="bg-blue-500 px-4 py-2 rounded-md"
-                        onPress={() => handlePublishPost(post._id, "PUBLISHED")}
-                    >
-                        <Text className="text-white font-semibold">Phê duyệt</Text>
-                    </TouchableOpacity>
 
-                    <TouchableOpacity
-                        className="bg-red-500 px-4 py-2 rounded-md"
-                        onPress={() => handlePublishPost(post._id, "REJECTED")}
-                    >
-                        <Text className="text-white font-semibold">Từ chối</Text>
-                    </TouchableOpacity>
+
                 </View>
 
-            )}
-        </View>
+                {/* Title */}
+                {isPostDetail === true ? (
+                    <Text className="font-bold text-lg mt-2">{post.title}
+                        <Text className="text-gray-500 text-sm font-normal" onTouchEnd={() => navigation.navigate('PostDetail', { post })}> - Xem chi tiết</Text>
+                    </Text>) : (
+                    <Text className="font-bold text-lg mt-2">{post.title}</Text>
+                )}
+
+                {/* Categories */}
+                <View className="flex-row mt-1">
+                    {post.tags.length === listDepartment.length ? (
+                        <Text className="text-xs text-white bg-blue-400 px-2 py-1 rounded-full ml-1">
+                            Tất cả
+                        </Text>
+                    ) : (
+                        post.tags.map((tag) => (
+                            <Text key={tag._id} className="bg-green-500 text-xs color-white px-2 py-1 rounded-full mr-1">{tag.name}</Text>
+
+                        ))
+                    )}
+                </View>
+
+                {/* Images */}
+                {post.images.length > 0 && renderImages(post.images)}
+
+                {/* Image Modal */}
+                <ImageViewing
+                    images={post.images.map((image) => ({ uri: image }))}
+                    imageIndex={selectedImageIndex}
+                    visible={visible}
+                    onRequestClose={() => setVisible(false)}
+                />
+
+                {isPublished === false ? (
+                    <>
+                        <View className="flex-row mt-3 justify-between items-center">
+                            {/* Emotion Button */}
+                            <View className="flex-row items-center">
+                                <Text>
+                                    {reactionCount}
+
+                                </Text>
+                                <View className="flex-row ml-1">
+                                    <FontAwesome name="thumbs-o-up" size={16} color="blue" />
+                                    <FontAwesome name="heart" size={16} color="red" />
+                                    <FontAwesome name="smile-o" size={16} color="yellow" />
+                                </View>
+                            </View>
+                            <View>
+                                <Text>
+                                    {commentsCount} bình luận
+                                </Text>
+                            </View>
+                        </View>
+                        {/* Emotion List */}
+                        {showEmotions && (
+                            <View style={{ flexDirection: 'row', marginTop: 4 }}>
+                                {emotions.map((emotion) => (
+                                    <TouchableOpacity
+                                        key={emotion.id}
+                                        onPress={() => handleEmotionSelect(emotion)}
+                                        style={{ marginHorizontal: 4 }}
+                                    >
+                                        <FontAwesome name={emotion.icon} size={28} color={emotion.color} />
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        )}
+                        {/* Footer */}
+                        <View className="flex-row mt-3 justify-between items-center">
+                            {/* Emotion Button */}
+                            <View>
+                                <TouchableOpacity
+                                    className="flex-row items-center"
+                                    onPress={handleLike} // Xử lý nhấn ngắn
+                                    onLongPress={handleLongPress} // Xử lý giữ lâu
+                                >
+                                    {selectedEmotion ? (
+                                        <FontAwesome name={selectedEmotion.icon} size={24} color={selectedEmotion.color} />
+                                    ) : (
+                                        <FontAwesome name={'thumbs-o-up'} size={24} color={'gray'} />
+                                    )}
+                                    <Text className="ml-2 text-gray-700">
+                                        {selectedEmotion ? selectedEmotion.name : 'Like'}
+                                    </Text>
+                                </TouchableOpacity>
+
+
+                            </View>
+
+                            {/* Comment Button */}
+                            {/* Toggle comments section */}
+                            <View className="flex-row mt-3 justify-between items-center">
+                                <TouchableOpacity className="flex-row items-center" onPress={handleCommentPress}>
+                                    <FontAwesome name="comment-o" size={24} color="gray" />
+                                    <Text className="ml-2 text-gray-700">Bình luận</Text>
+                                </TouchableOpacity>
+                            </View>
+
+
+                        </View>
+                    </>
+                ) : (
+                    <View className="flex-row mt-3 justify-between items-center">
+                        <TouchableOpacity
+                            className="bg-blue-500 px-4 py-2 rounded-md"
+                            onPress={() => handlePublishPost(post._id, "PUBLISHED")}
+                        >
+                            <Text className="text-white font-semibold">Phê duyệt</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="bg-red-500 px-4 py-2 rounded-md"
+                            onPress={handleOpenRejectionModal}
+                        >
+                            <Text className="text-white font-semibold">Từ chối</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                )}
+            </View>
+        </>
+
     );
 };
 

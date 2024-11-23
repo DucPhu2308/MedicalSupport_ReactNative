@@ -27,8 +27,9 @@ const PublishPostScreen = ({ navigation }) => {
         try {
             // Call API to get list of posts
             const response = await PostAPI.getAllPost();
-            const pendingPosts = response.data.filter(post => post.status === 'PENDING' && post.tags.some(tag => tag._id === user.doctorInfo.specialities[0]));
-            setListPost(pendingPosts);
+            const pendingPosts = response.data.filter(post => post.status === "PENDING" && post.tags.some(tag => tag._id === user.doctorInfo.specialities[0]));
+            const sortedPosts = pendingPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            setListPost(sortedPosts);
         } catch (error) {
             console.error("Failed to fetch posts:", error);
         } finally {
@@ -38,8 +39,9 @@ const PublishPostScreen = ({ navigation }) => {
 
     useFocusEffect(
         useCallback(() => {
+            currentUser();
             fetchPost();
-        }, [])
+        }, [navigation])
     );
 
     const renderPublishPostHeader = () => (

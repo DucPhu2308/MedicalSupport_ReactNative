@@ -51,6 +51,8 @@ class PostAPI {
         const url = `/post/${id}`;
         return axiosPrivate.delete(url);
     }
+
+    
 }
 
 export default PostAPI;

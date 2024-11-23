@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import { DepartmentAPI } from "../API/DepartmentAPI";
 import { set } from "date-fns";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function CreatePostScreen() {
     const [selectedImages, setSelectedImages] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
@@ -17,6 +18,15 @@ export default function CreatePostScreen() {
     const navigation = useNavigation();
     const [selectedTopic, setSelectedTopic] = useState('all');
     const [departments, setDepartments] = useState([]);
+    const [user, setUser] = useState({ roles: [] });
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const user = await AsyncStorage.getItem('user');
+            setUser(JSON.parse(user));
+        };
+        fetchUser();
+    }, []);
 
     useEffect(() => {
         DepartmentAPI.getAll().
@@ -37,15 +47,24 @@ export default function CreatePostScreen() {
         const formData = new FormData();
         formData.append('title', title);
         formData.append('content', content);
-        if (selectedTopic !== 'all') {
-            formData.append('tags', selectedTopic);
+        formData.append('author', user._id);
+
+        if (user.roles.includes('DOCTOR')) {
+            formData.append('tags', user.doctorInfo.specialities[0]);
         }
-        else{
-            departments.forEach((department) => {
-                tags.push(department._id);
-            });
-            formData.append('tags', tags);
+        else {
+            if (selectedTopic !== 'all') {
+                formData.append('tags', selectedTopic);
+            }
+            else {
+                departments.forEach((department) => {
+                    tags.push(department._id);
+                });
+                formData.append('tags', tags);
+            }
         }
+
+
         selectedImages.forEach((image, index) => {
             formData.append('images', {
                 name: `image-${index}.jpg`,
@@ -61,7 +80,7 @@ export default function CreatePostScreen() {
         PostAPI.createPost(formData)
             .then(response => {
                 console.log(response.data);
-                alert('Đăng bài viết thành công!');
+                alert('Bài viết của bạn đang chờ duyệt!');
                 navigation.goBack();
             })
             .catch(error => {
@@ -147,27 +166,31 @@ export default function CreatePostScreen() {
                             />
                         </ScrollView>
 
-                        <View className="mt-3">
-                            <Text className="text-sm text-gray-500 mb-1">Chọn chủ đề bài viết</Text>
-                            <View style={{
-                                borderWidth: 1,
-                                borderColor: 'gray',
-                                borderRadius: 10, // Bo tròn góc
-                                overflow: 'hidden',
-                                backgroundColor: '#f9f9f9'
-                            }}>
-                                <Picker
-                                    selectedValue={selectedTopic}
-                                    onValueChange={(itemValue) => setSelectedTopic(itemValue)}
-                                    style={{  color: 'gray' }}
-                                >
-                                    <Picker.Item label="Tất cả" value="all" />
-                                    {departments.map((department) => (
-                                        <Picker.Item key={department._id} label={department.name} value={department._id} />
-                                    ))}
-                                </Picker>
+                        {!user.roles.includes('DOCTOR') && (
+                            <View className="mt-3">
+                                <Text className="text-sm text-gray-500 mb-1">Chọn chủ đề bài viết</Text>
+                                <View style={{
+                                    borderWidth: 1,
+                                    borderColor: 'gray',
+                                    borderRadius: 10, // Bo tròn góc
+                                    overflow: 'hidden',
+                                    backgroundColor: '#f9f9f9'
+                                }}>
+                                    <Picker
+                                        selectedValue={selectedTopic}
+                                        onValueChange={(itemValue) => setSelectedTopic(itemValue)}
+                                        style={{ color: 'gray' }}
+                                    >
+                                        <Picker.Item label="Tất cả" value="all" />
+                                        {departments.map((department) => (
+                                            <Picker.Item key={department._id} label={department.name} value={department._id} />
+                                        ))}
+                                    </Picker>
+                                </View>
                             </View>
-                        </View>
+                        )}
+
+
 
                         {/* Image Upload */}
                         <View className="flex-row mt-3">

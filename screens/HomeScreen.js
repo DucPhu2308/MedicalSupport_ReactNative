@@ -10,7 +10,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const LIMIT = 5;
+  const LIMIT = 0;
 
   const navigation = useNavigation();
 
@@ -18,7 +18,9 @@ const HomeScreen = () => {
     setLoading(true);
     try {
       const response = await PostAPI.getPostPagination(page, LIMIT);
-      setPosts([...posts, ...response.data]);
+      const filteredData = response.data.filter(item => item.status === 'PUBLISHED');
+      
+      setPosts([...posts, ...filteredData]);
       if (response.data.length < LIMIT) {
         setHasMore(false);
       }
@@ -27,6 +29,8 @@ const HomeScreen = () => {
     }
     setLoading(false);
   };
+
+  
 
   
   useEffect(() => {
