@@ -4,8 +4,7 @@ import queryString from "query-string";
 import { useNavigation } from "@react-navigation/native";
 
 //const BASE_URL = 'http://192.168.202.135:4000/api';
-//const BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
-const BASE_URL = "http://192.168.1.196:4000/api";
+const BASE_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
 
 const axiosClient = axios.create({
   baseURL: BASE_URL,
