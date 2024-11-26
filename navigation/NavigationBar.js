@@ -33,7 +33,7 @@ const NavigationBar = () => {
   // const [searchUser, setSearchUser] = useState({});
   const searchUser = useAuth().user;
   // const [isDoctor, setIsDoctor] = useState(false);
-  const isDoctor = searchUser.roles?.includes("DOCTOR");
+  const isDoctor = searchUser?.roles?.includes("DOCTOR");
   const navigation = useNavigation();
 
   useEffect(() => {
