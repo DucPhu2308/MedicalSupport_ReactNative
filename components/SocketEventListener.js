@@ -30,13 +30,14 @@ const SocketEventListener = () => {
 
     useEffect(() => {
         const handleNewNotification = (notification) => {
+            snackbarType = 'notification';
             setShowSnackbar(true);
             setNotification(notification.content);
             dispatch(fetchNotifications());
-            snackbarType = 'notification';
         };
 
         const handleNewMessage = (message) => {
+            snackbarType = 'message';
             setShowSnackbar(true);
             if (message.type === MessageType.TEXT) {
                 setNotification(`Bạn có tin nhắn mới từ ${message.sender.lastName}`);
@@ -45,10 +46,10 @@ const SocketEventListener = () => {
             } else if (message.type === MessageType.APPOINTMENT) {
                 setNotification(`${message.sender.lastName} đã gửi lời mời cuộc hẹn cho bạn`);
             }
-            snackbarType = 'message';
             dispatch(getUnreadCount());
         };
         if (socket) {
+            console.log('Socket event listener attached');
             socket.on('new-notification', (notification) => handleNewNotification(notification));
             socket.on('receive-message', (message) => handleNewMessage(message));
         }

@@ -110,7 +110,9 @@ function ChatScreen({ navigation }) {
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => {
             const friend = item.participants.find((participant) => participant._id !== user._id);
+            const isDoctor = friend.roles?.includes('DOCTOR');
             return <ChatItem avatarUrl={friend.avatar}
+              isDoctor={isDoctor}
               isRead={item.isRead}
               onPress={() => navigation.navigate('ChatDetail', { chatId: item._id, friend })}
               username={`${friend.firstName} ${friend.lastName}`}
