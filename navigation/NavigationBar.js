@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "../redux/slices/notificationSlice";
 import PublishPostScreen from "../screens/PublishPostScreen";
 import { getUnreadCount } from "../redux/slices/chatSlice";
+import { useAuth } from "../contexts/AuthContext";
 
 const Tab = createBottomTabNavigator();
 
@@ -29,27 +30,29 @@ const NavigationBar = () => {
   }, []);
 
 
-  const [searchUser, setSearchUser] = useState({});
-  const [isDoctor, setIsDoctor] = useState(false);
+  // const [searchUser, setSearchUser] = useState({});
+  const searchUser = useAuth().user;
+  // const [isDoctor, setIsDoctor] = useState(false);
+  const isDoctor = searchUser.roles?.includes("DOCTOR");
   const navigation = useNavigation();
 
   useEffect(() => {
     dispatch(fetchNotifications());
   }, [dispatch]);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchUserData();
-    }, [])
-  );
-  const fetchUserData = async () => {
-    const user = await AsyncStorage.getItem("user");
-    if (user) {
-      const parsedUser = JSON.parse(user);
-      setSearchUser(parsedUser);
-      setIsDoctor(parsedUser.roles.includes("DOCTOR")); 
-    }
-  };
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     fetchUserData();
+  //   }, [])
+  // );
+  // const fetchUserData = async () => {
+  //   const user = await AsyncStorage.getItem("user");
+  //   if (user) {
+  //     const parsedUser = JSON.parse(user);
+  //     setSearchUser(parsedUser);
+  //     setIsDoctor(parsedUser.roles.includes("DOCTOR")); 
+  //   }
+  // };
 
   const handleClickTab = (routeName) => {
     if (routeName === "Profile") {
