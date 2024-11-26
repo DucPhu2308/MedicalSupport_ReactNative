@@ -397,7 +397,11 @@ const PostItem = ({ post, onDelete }) => {
                     <Text className="font-bold text-lg mt-2">{post.title}
                         <Text className="text-gray-500 text-sm font-normal" onTouchEnd={() => navigation.navigate('PostDetail', { post })}> - Xem chi tiết</Text>
                     </Text>) : (
-                    <Text className="font-bold text-lg mt-2">{post.title}</Text>
+                        <>
+                            <Text className="font-bold text-lg mt-2">{post.title}</Text>
+                            <Text className="text-gray-500 text-sm font-normal">{post.content}</Text>
+                        </>
+                    
                 )}
 
                 {/* Categories */}

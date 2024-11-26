@@ -19,15 +19,19 @@ const PublishPostScreen = ({ navigation }) => {
         
     };
 
-    useEffect(() => {
-        currentUser();
-    }, [navigation]);
-
-    const fetchPost = async () => {
+    const fetchPost = async (currentUser) => {
         try {
-            // Call API to get list of posts
+            if (!currentUser || !currentUser.doctorInfo || !currentUser.doctorInfo.specialities?.length) {
+                setListPost([]);
+                setLoading(false);
+                return;
+            }
+    
             const response = await PostAPI.getAllPost();
-            const pendingPosts = response.data.filter(post => post.status === "PENDING" && post.tags.some(tag => tag._id === user.doctorInfo.specialities[0]));
+            const pendingPosts = response.data.filter(post =>
+                post.status === "PENDING" &&
+                post.tags.some(tag => tag._id === currentUser.doctorInfo.specialities[0])
+            );
             const sortedPosts = pendingPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             setListPost(sortedPosts);
         } catch (error) {
@@ -40,8 +44,8 @@ const PublishPostScreen = ({ navigation }) => {
     useFocusEffect(
         useCallback(() => {
             currentUser();
-            fetchPost();
-        }, [navigation])
+            fetchPost(user);
+        }, [user])
     );
 
     const renderPublishPostHeader = () => (

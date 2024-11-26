@@ -25,7 +25,7 @@ const PostComment = () => {
     const getComments = async () => {
       try {
         const response = await CommentAPI.getCommentByPostId(post._id);
-        setCommentsData(response.data);
+        setCommentsData(response.data.comments);
       } catch (error) {
         console.error(error);
       }
@@ -200,13 +200,11 @@ const PostComment = () => {
       </View>
 
       <ScrollView className="flex-1">
-        {commentsData.length === 0 && (
+        {commentsData.length === 0 ? (
           <View className="p-4">
             <Text className="text-gray-500">Chưa có bình luận nào</Text>
           </View>
-        )}
-
-        {commentsData.map((comment) => (
+        ) : (commentsData.map((comment) => (
           <View key={comment._id} className="p-4">
             <View className="flex-row items-start">
               <Image
@@ -246,7 +244,7 @@ const PostComment = () => {
               </View>
             </View>
           </View>
-        ))}
+        )))}
       </ScrollView>
 
       <View className="p-2 border-t border-gray-300 bg-white">
