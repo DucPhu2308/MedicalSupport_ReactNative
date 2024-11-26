@@ -39,7 +39,10 @@ const ChatDetailScreen = ({ navigation, route }) => {
         setLoading(true);
         try {
             const response = await ChatAPI.getMessagesPagination(chatId, page, LIMIT);
-            setMessages([...messages, ...response.data]);
+            const newMessages = response.data;
+            // filter out duplicated messages
+            const filteredMessages = newMessages.filter((msg) => !messages.some((m) => m._id === msg._id));
+            setMessages(prevMessages => [...prevMessages, ...filteredMessages]);
             if (response.data.length < LIMIT) {
                 setHasMore(false);
             }
@@ -63,13 +66,15 @@ const ChatDetailScreen = ({ navigation, route }) => {
         }
     };
 
+    const handleNewMessage = (message) => {
+        setMessages(prevMessages => [message, ...prevMessages]);
+        // scroll to bottom (the list is inverted)
+        messageListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+    };
+
     useEffect(() => {
         if (socket) {
-            socket.on('receive-message', (message) => {
-                setMessages(prevMessages => [message, ...prevMessages]);
-                // scroll to bottom (the list is inverted)
-                messageListRef.current?.scrollToOffset({ animated: true, offset: 0 });
-            });
+            socket.on('receive-message', handleNewMessage);
 
             socket.on('update-message', (message) => {
                 if (message.chat === chatId) {
@@ -86,7 +91,7 @@ const ChatDetailScreen = ({ navigation, route }) => {
 
         return () => {
             if (socket) {
-                socket.off('receive-message');
+                socket.off('receive-message', handleNewMessage);
                 socket.off('update-message');
             }
         };

@@ -106,6 +106,7 @@ function ChatScreen({ navigation }) {
         )
       ) : (
         <FlatList
+          ListEmptyComponent={<Text>Không có cuộc trò chuyện nào</Text>}
           data={chats}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => {
