@@ -372,9 +372,9 @@ const PostItem = ({ post, onDelete }) => {
                             </View>
 
                             <View className="flex-row items-center ml-3">
-                                {user?.roles.includes('DOCTOR') && (
-                                    <Text className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                                        Bác sĩ
+                                {post.author?.roles.includes('DOCTOR') && (
+                                    <Text className="text-xs bg-yellow-400 text-white px-2 py-1 rounded-lg">
+                                       <FontAwesome name="check" size={16} color="green" /> Bác sĩ
                                     </Text>
                                 )}
                             </View>

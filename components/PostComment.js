@@ -194,7 +194,7 @@ const PostComment = () => {
         <Text className="text-gray-900 font-bold">
           <FontAwesome name="thumbs-o-up" size={24} color="gray" />
           <FontAwesome name="heart" size={24} color="red" />
-          <FontAwesome name="surprise" size={24} color="yellow" />
+          <FontAwesome name="smile-o" size={24} color="yellow" />
           {loveCount + likeCount + surpriseCount}
         </Text>
       </View>

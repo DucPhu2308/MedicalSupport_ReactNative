@@ -5,23 +5,25 @@ import { View, FlatList, Text, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { useAuth } from "../contexts/AuthContext";
 
 const PublishPostScreen = ({ navigation }) => {
     const [listPost, setListPost] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState({});
+    const { user } = useAuth();
+    // const [user, setUser] = useState({});
 
-    const currentUser = async () => {
-        const user = await AsyncStorage.getItem("user");
-        if (user) {
-            setUser(JSON.parse(user));
-        }
+    // const currentUser = async () => {
+    //     const user = await AsyncStorage.getItem("user");
+    //     if (user) {
+    //         setUser(JSON.parse(user));
+    //     }
         
-    };
+    // };
 
-    useEffect(() => {
-        currentUser();
-    }, [navigation]);
+    // useEffect(() => {
+    //     currentUser();
+    // }, [navigation]);
 
     const fetchPost = async () => {
         try {
@@ -39,7 +41,7 @@ const PublishPostScreen = ({ navigation }) => {
 
     useFocusEffect(
         useCallback(() => {
-            currentUser();
+            // currentUser();
             fetchPost();
         }, [navigation])
     );

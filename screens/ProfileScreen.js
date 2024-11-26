@@ -106,8 +106,14 @@ const ProfileScreen = ({ route }) => {
             </View>
 
             <View className="px-4 mt-5">
-                <Text className="text-2xl font-bold">{user.firstName} {user.lastName}</Text>
-
+                <View className="flex-row">
+                    <Text className="text-2xl font-bold">{user.firstName} {user.lastName}</Text>
+                    {user.roles?.includes('DOCTOR') && (
+                        <Text className="text-xs self-center bg-yellow-400 text-white px-2 py-1 rounded-lg">
+                            <FontAwesome name="check" size={16} color="green" /> Bác sĩ
+                        </Text>
+                    )}
+                </View>
                 <View className="flex-row mt-4 space-x-2">
 
                     {currentUser._id === user._id ? (
@@ -116,7 +122,7 @@ const ProfileScreen = ({ route }) => {
                         </TouchableOpacity>
                     ) : (
                         <>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 onPress={handlePrivateChat}
                                 className="flex-1 bg-blue-500 py-2 rounded-lg items-center"
                             >
@@ -175,14 +181,14 @@ const ProfileScreen = ({ route }) => {
     }
 
     return (
-        
+
         <View>
             <FlatList
-            data={posts}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => <PostItem post={item} onDelete={() => fetchPosts(searchUser._id)} />}
-            ListHeaderComponent={renderProfileHeader}
-        />
+                data={posts}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => <PostItem post={item} onDelete={() => fetchPosts(searchUser._id)} />}
+                ListHeaderComponent={renderProfileHeader}
+            />
             {currentUser._id === user._id && (
                 <TouchableOpacity
                     className="fixed bottom-12 bg-red-500/90 self-center shadow-xl
