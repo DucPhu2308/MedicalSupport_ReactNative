@@ -21,7 +21,7 @@ const ImageMessageItem = ({ message, isSent }) => {
         `}>
             {imageUris.map((image, index) => (
                 <TouchableOpacity
-                    className={`${images.length === 1 ? 'w-3/4 h-64' : 'w-32 h-32'}`}
+                    className={`${images.length === 1 ? 'w-64 h-64' : 'w-32 h-32'}`}
                     key={index} onPress={() => openImageViewer(index)}>
                     <Image
                         source={typeof image === 'string' ? { uri: image } : image}

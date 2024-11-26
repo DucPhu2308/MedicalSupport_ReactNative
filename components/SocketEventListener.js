@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { useSocket } from "../contexts/SocketProvider";
 import { useDispatch } from "react-redux";
 import { fetchNotifications } from "../redux/slices/notificationSlice";
@@ -7,9 +7,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { MessageType } from "../API/ChatAPI";
 import { getUnreadCount } from "../redux/slices/chatSlice";
+import { View } from "react-native";
 
 
-const SocketEventListener = () => {
+const SocketEventListener = memo(() => {
     const socket = useSocket();
     const navigation = useNavigation();
     const [showSnackbar, setShowSnackbar] = useState(false);
@@ -28,41 +29,45 @@ const SocketEventListener = () => {
             navigation.navigate('Notification');
     }, [navigation, snackbarType]);
 
-    useEffect(() => {
-        const handleNewNotification = (notification) => {
-            setShowSnackbar(true);
-            setNotification(notification.content);
-            dispatch(fetchNotifications());
-            snackbarType = 'notification';
-        };
+    const handleNewMessage = (message) => {
+        console.log('New message received:', message);
+        snackbarType = 'message';
+        setShowSnackbar(true);
+        if (message.type === MessageType.TEXT) {
+            setNotification(`Bạn có tin nhắn mới từ ${message.sender.lastName}`);
+        } else if (message.type === MessageType.IMAGE) {
+            setNotification(`${message.sender.lastName} đã gửi ảnh cho bạn`);
+        } else if (message.type === MessageType.APPOINTMENT) {
+            setNotification(`${message.sender.lastName} đã gửi lời mời cuộc hẹn cho bạn`);
+        }
+        dispatch(getUnreadCount());
+    };
 
-        const handleNewMessage = (message) => {
-            setShowSnackbar(true);
-            if (message.type === MessageType.TEXT) {
-                setNotification(`Bạn có tin nhắn mới từ ${message.sender.lastName}`);
-            } else if (message.type === MessageType.IMAGE) {
-                setNotification(`${message.sender.lastName} đã gửi ảnh cho bạn`);
-            } else if (message.type === MessageType.APPOINTMENT) {
-                setNotification(`${message.sender.lastName} đã gửi lời mời cuộc hẹn cho bạn`);
-            }
-            snackbarType = 'message';
-            dispatch(getUnreadCount());
-        };
+    const handleNewNotification = (notification) => {
+        snackbarType = 'notification';
+        setShowSnackbar(true);
+        setNotification(notification.content);
+        dispatch(fetchNotifications());
+    };
+
+    useEffect(() => {
+        console.log('Socket event listener attached');
         if (socket) {
-            socket.on('new-notification', (notification) => handleNewNotification(notification));
-            socket.on('receive-message', (message) => handleNewMessage(message));
+            socket.on('new-notification', handleNewNotification);
+            socket.on('receive-message', handleNewMessage);
         }
 
         return () => {
             if (socket) {
-                socket.off('new-notification');
-                socket.off('receive-message');
+                console.log('Socket event listener detached');
+                socket.off('new-notification', handleNewNotification);
+                socket.off('receive-message', handleNewMessage);
             }
         }
     }, [socket]);
 
     return (
-        <>
+        <View style={{zIndex: 100}}>
             {(
                 <Snackbar
                     visible={showSnackbar}
@@ -77,8 +82,8 @@ const SocketEventListener = () => {
                     {notification}
                 </Snackbar>
             )}
-        </>
+        </View>
     );
-}
+});
 
 export default SocketEventListener;
