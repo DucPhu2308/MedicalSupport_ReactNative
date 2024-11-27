@@ -5,6 +5,7 @@ import { useRoute } from '@react-navigation/native';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const PostComment = () => {
   const [visibleReplies, setVisibleReplies] = useState({});
@@ -189,7 +190,7 @@ const PostComment = () => {
   };
 
   return (
-    <View className="flex-1 mt-4 bg-gray-100">
+    <SafeAreaView className="flex-1 bg-gray-100">
       <View className="p-4 bg-white flex-row items-center justify-between border-b border-gray-300">
         <Text className="text-gray-900 font-bold">
           <FontAwesome name="thumbs-o-up" size={24} color="gray" />
@@ -287,7 +288,7 @@ const PostComment = () => {
           </View>
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

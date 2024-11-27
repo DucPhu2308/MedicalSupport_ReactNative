@@ -3,6 +3,8 @@ import { FlatList, View, Image, Text, TouchableOpacity } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserAPI } from "../API/UserAPI";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { COLOR } from "../CommonConst";
 
 const ListUserFollowScreen = ({ navigation }) => {
     const [listUserFollow, setListUserFollow] = useState([]);
@@ -39,9 +41,9 @@ const ListUserFollowScreen = ({ navigation }) => {
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: "white" }}>
-            <View style={{ marginTop: 20, flexDirection: "row", alignItems: "center", padding: 8, borderBottomWidth: 1, borderBottomColor: "#e0e0e0" }}>
-                <Text style={{ fontWeight: "bold" }}>Danh sách theo dõi bạn</Text>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", padding: 8, borderBottomWidth: 1, borderBottomColor: "#e0e0e0", backgroundColor: COLOR.PRIMARY }}>
+                <Text style={{ fontWeight: "bold", color: "white" }}>Danh sách theo dõi bạn</Text>
             </View>
             <FlatList
                 data={listUserFollow}
@@ -60,7 +62,7 @@ const ListUserFollowScreen = ({ navigation }) => {
                     </TouchableOpacity>
                 )}
             />
-        </View>
+        </SafeAreaView>
     );
 };
 

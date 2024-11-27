@@ -10,9 +10,15 @@ import { ChatAPI } from "../API/ChatAPI";
 import { useAuth } from "../contexts/AuthContext";
 
 const ProfileScreen = () => {
-    const route = useRoute()
-    const { searchUser } = route.params;
-    const { logout } = useAuth();
+    const route = useRoute();
+    const auth = useAuth();
+    let searchUser;
+    if (!route.params) {
+        searchUser = auth.user;
+    } else {
+        searchUser = route.params.searchUser;
+    }
+    const logout = auth.logout;
     const [posts, setPosts] = useState([]);
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
@@ -191,7 +197,7 @@ const ProfileScreen = () => {
                 renderItem={({ item }) => <PostItem post={item} onDelete={() => fetchPosts(searchUser._id)} />}
                 ListHeaderComponent={renderProfileHeader}
             />
-            {currentUser._id === user._id && (
+            {/* {currentUser._id === user._id && (
                 <TouchableOpacity
                     className="fixed bottom-12 bg-red-500/90 self-center shadow-xl
                         w-8/12 h-10 rounded-2xl items-center justify-center"
@@ -199,7 +205,7 @@ const ProfileScreen = () => {
                 >
                     <Text className="text-white">Đăng xuất</Text>
                 </TouchableOpacity>
-            )}
+            )} */}
         </View>
     );
 };

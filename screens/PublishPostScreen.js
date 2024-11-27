@@ -49,14 +49,14 @@ const PublishPostScreen = ({ navigation }) => {
     }
 
     return (
-        <SafeAreaView>
+        <View>
             <FlatList
                 data={listPost}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => <PostItem post={item} navigation={navigation} onDelete={fetchPost} />}
                 ListHeaderComponent={renderPublishPostHeader}
             />
-        </SafeAreaView>
+        </View>
         
     );
 };

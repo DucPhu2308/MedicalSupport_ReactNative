@@ -6,6 +6,7 @@ import { Image, View, Alert, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as FileSystem from 'expo-file-system';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 const UpdateProfileScreen = ({ navigation }) => {
@@ -104,7 +105,7 @@ const UpdateProfileScreen = ({ navigation }) => {
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: "white", padding: 16 }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "white", padding: 16 }}>
             <Text style={{ fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 16 }}>
                 Cập nhật thông tin cá nhân
             </Text>
@@ -195,7 +196,7 @@ const UpdateProfileScreen = ({ navigation }) => {
             >
                 <Text style={{ color: "white", fontWeight: "bold" }}>Cập nhật</Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 };
 

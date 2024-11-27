@@ -56,6 +56,8 @@ const NavigationBar = () => {
 
   const handleClickTab = (routeName) => {
     if (routeName === "Profile") {
+      console.log("Search user", searchUser);
+
       navigation.navigate("Profile", { searchUser });
     } else {
       navigation.navigate(routeName);
@@ -107,6 +109,14 @@ const NavigationBar = () => {
         )}
 
         {/* Hide SearchScreen and PostDetailScreen from the tab bar */}
+        <Tab.Screen
+          name="OtherProfile"
+          component={ProfileScreen}
+          options={{
+            tabBarButton: () => null,
+            headerShown: true
+          }}
+        />
         <Tab.Screen name="Search" component={SearchScreen} options={{
           tabBarButton: () => null,
           headerShown: false

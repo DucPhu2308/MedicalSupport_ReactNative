@@ -365,7 +365,7 @@ const PostItem = ({ post, onDelete }) => {
                                 className="w-12 h-12 rounded-full"
                             />
                             <View className="ml-3">
-                                <TouchableOpacity onPress={() => navigation.navigate('Profile', { searchUser: post.author })}>
+                                <TouchableOpacity onPress={() => navigation.navigate('OtherProfile', { searchUser: post.author })}>
                                     <Text className="font-bold">{post.author.firstName} {post.author.lastName}</Text>
                                 </TouchableOpacity>
                                 <Text className="text-gray-500 text-xs">{formatTime(post.createdAt)}</Text>
