@@ -11,28 +11,14 @@ const PublishPostScreen = ({ navigation }) => {
     const [listPost, setListPost] = useState([]);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
-    // const [user, setUser] = useState({});
 
-    // const currentUser = async () => {
-    //     const user = await AsyncStorage.getItem("user");
-    //     if (user) {
-    //         setUser(JSON.parse(user));
-    //     }
-        
-    // };
-
-    const fetchPost = async (currentUser) => {
+    const fetchPost = async () => {
         try {
-            if (!currentUser || !currentUser.doctorInfo || !currentUser.doctorInfo.specialities?.length) {
-                setListPost([]);
-                setLoading(false);
-                return;
-            }
-    
+
             const response = await PostAPI.getAllPost();
             const pendingPosts = response.data.filter(post =>
                 post.status === "PENDING" &&
-                post.tags.some(tag => tag._id === currentUser.doctorInfo.specialities[0])
+                post.tags.some(tag => tag._id === user.doctorInfo.specialities[0])
             );
             const sortedPosts = pendingPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             setListPost(sortedPosts);
@@ -43,12 +29,10 @@ const PublishPostScreen = ({ navigation }) => {
         }
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            currentUser();
-            fetchPost(user);
-        }, [user])
-    );
+
+    useEffect(() => {
+        fetchPost();
+    }, []);
 
     const renderPublishPostHeader = () => (
         <View >
