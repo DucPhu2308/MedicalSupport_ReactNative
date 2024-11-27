@@ -92,7 +92,9 @@ function ChatScreen({ navigation }) {
             data={searchResult}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => {
+              const isDoctor = item.roles?.includes('DOCTOR');
               return <ChatItem avatarUrl={item.avatar}
+                isDoctor={isDoctor}
                 username={`${item.firstName} ${item.lastName}`}
                 lastMessage={null} 
                 onPress={() => handlePrivateChat(item._id)}

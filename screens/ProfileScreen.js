@@ -5,11 +5,13 @@ import { FontAwesome } from '@expo/vector-icons';
 import PostAPI from "../API/PostAPI";
 import { UserAPI } from "../API/UserAPI";
 import PostItem from "../components/PostItem";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { ChatAPI } from "../API/ChatAPI";
 import { useAuth } from "../contexts/AuthContext";
 
-const ProfileScreen = ({ route }) => {
+const ProfileScreen = () => {
+    const route = useRoute()
+    const { searchUser } = route.params;
     const { logout } = useAuth();
     const [posts, setPosts] = useState([]);
     const [user, setUser] = useState({});
@@ -18,7 +20,6 @@ const ProfileScreen = ({ route }) => {
     const [isFollowing, setIsFollowing] = useState(false);
     const navigation = useNavigation();
     const [countFollowing, setCountFollowing] = useState(0);
-    const { searchUser } = route.params;
 
     const fetchUser = async (id) => {
         try {

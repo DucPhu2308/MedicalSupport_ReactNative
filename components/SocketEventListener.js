@@ -8,9 +8,11 @@ import { useNavigation } from "@react-navigation/native";
 import { MessageType } from "../API/ChatAPI";
 import { getUnreadCount } from "../redux/slices/chatSlice";
 import { View } from "react-native";
+import { useAuth } from "../contexts/AuthContext";
 
 
 const SocketEventListener = memo(() => {
+    const { user } = useAuth();
     const socket = useSocket();
     const navigation = useNavigation();
     const [showSnackbar, setShowSnackbar] = useState(false);
@@ -30,7 +32,7 @@ const SocketEventListener = memo(() => {
     }, [navigation, snackbarType]);
 
     const handleNewMessage = (message) => {
-        console.log('New message received:', message);
+        if (message.sender._id === user._id) return;
         snackbarType = 'message';
         setShowSnackbar(true);
         if (message.type === MessageType.TEXT) {
