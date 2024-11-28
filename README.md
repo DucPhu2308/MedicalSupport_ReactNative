@@ -31,6 +31,13 @@ The main purpose of building a website to support patients and doctors is to cre
 
 ![image](https://github.com/user-attachments/assets/40308ac0-7c80-4a45-867d-c5adf485537b)
 
+![image](https://github.com/user-attachments/assets/85f3fafa-58b4-4c26-8e49-8a8cd498a109)
+
+![image](https://github.com/user-attachments/assets/161f36bf-e046-4494-b840-1bb52462fc6a)
+
+![image](https://github.com/user-attachments/assets/416f2db1-13f6-4964-81cb-d6e3c77f34c3)
+
+
 
 ## Getting Started (React Native only)
 
